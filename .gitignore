@@ -1,0 +1,12 @@
+# mac/windows
+.DS_Store
+Thumbs.db
+
+# node
+node_modules
+.next
+dist
+
+# env
+.env
+.env.local
