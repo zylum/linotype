@@ -4,7 +4,14 @@
 - Introduced explicit slug intent: Directional vs Build
 - Clarified PDA vs Module Architect responsibilities
 - Standardised review gate with Proof-backed completion
-- Provided starter docs for learning, roles, slug types, examples
+- Added comprehensive bootstrap script (`linotype-bootstrap.sh`)
+- Enhanced `linotype.sh` with start/check/review/done commands
+- Added `docs/context/app-context.md` for product snapshot
+- Added `docs/capabilities/` structure for modules and registry
+- Provided starter slugs (SLUG-001 and SLUG-002)
+- Added Getting Started guide and Quick Reference
+- Added structure documentation and expanded FAQ
+- Optional Kiro/Cursor integration files
 
 ## v2.0.0
 - Added `review/` stage to slug workflow
