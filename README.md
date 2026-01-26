@@ -2,6 +2,8 @@
 
 Linotype is an operating model for building complex products while keeping coherence over time.
 
+**🌐 Website:** [linotype-site.vercel.app](https://linotype-site.vercel.app)
+
 - Method: BMAD (how you plan and build inside a Slug)
 - Operating model: Linotype (how the system stays coherent across Slugs)
 - Unit of work: Slug (smallest delegable change)
