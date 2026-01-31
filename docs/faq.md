@@ -33,3 +33,27 @@ You can manually create just the parts you need:
 - Templates
 
 But the full bootstrap is recommended for consistency.
+
+## What's a Galley?
+A Galley is a temporary grouping of execution slugs that together realise one product change. It's owned by PDA and lives as a folder in `docs/work/planning/`. See [Galleys](galleys.md) for details.
+
+## Do I need to use Galleys?
+No. Galleys are optional. Use them when:
+- Multiple modules need to coordinate on a single product change
+- You want to preserve the "why" across multiple slugs
+- You're planning parallel work that needs sequencing
+
+Skip Galleys for small, single-module changes.
+
+## Can a slug exist without a Galley?
+Yes. Slugs can exist independently. Use a Galley only when you need to coordinate multiple slugs.
+
+## Who creates Galleys?
+PDA (Product Design Authority) creates and owns Galleys. Module Owners execute the slugs within a Galley but don't edit the Galley itself.
+
+## What's the difference between a Galley and a Directional slug?
+Both are planning artefacts:
+- **Directional slug**: Explores options for a single module, outputs a decision
+- **Galley**: Coordinates multiple modules, outputs a product change
+
+Use Directional slugs for decisions. Use Galleys for coordinated work.

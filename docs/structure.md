@@ -25,7 +25,7 @@ One folder per module. Each contains:
 
 ### docs/work/
 Slug workflow stages:
-- `planning/` - Slugs waiting to start
+- `planning/` - Slugs waiting to start (and Galley folders)
 - `doing/` - Active work
 - `review/` - Awaiting validation
 - `done/` - Completed slugs
@@ -33,6 +33,11 @@ Slug workflow stages:
 Each slug has:
 - `SLUG-XXX.name.md` - The plan
 - `SLUG-XXX.name.build-notes.md` - Implementation notes (created when started)
+
+Galleys live as folders in `planning/`:
+- `GALLEY-YYYYMMDD-name/` - Galley folder
+  - `README.md` - The Galley brief
+  - Optional supporting files (research, architecture, etc.)
 
 ### docs/templates/
 Templates for creating new slugs and build notes.
@@ -77,3 +82,4 @@ Downloads and sets up Linotype structure in a new project. Creates:
 2. **Minimal by default** - Start thin, expand only when needed
 3. **Coherence over time** - Structure preserves understanding as product evolves
 4. **Delegable work** - Slugs have clear boundaries and can be handed off
+5. **Coordinated change** - Galleys group related slugs without forcing hierarchy

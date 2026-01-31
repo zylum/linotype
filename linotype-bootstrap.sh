@@ -3,7 +3,13 @@ set -euo pipefail
 
 MODE="init"
 VERSION_FILE=".linotype-version"
-CURRENT_VERSION="0.32"
+CURRENT_VERSION="3.0.0"
+
+# Read previous version if it exists
+PREV_VERSION=""
+if [ -f "$VERSION_FILE" ]; then
+  PREV_VERSION="$(cat "$VERSION_FILE" 2>/dev/null || true)"
+fi
 
 # Parse flags
 while [[ $# -gt 0 ]]; do
@@ -28,6 +34,14 @@ done
 
 echo "Linotype v$CURRENT_VERSION - Mode: $MODE"
 
+# Helper: write file safely (no variable expansion in content)
+write_file() {
+  local path="$1"
+  local content="$2"
+  mkdir -p "$(dirname "$path")"
+  printf '%s\n' "$content" > "$path"
+}
+
 # Helper: create or update file based on mode
 mkfile () {
   local path="$1"
@@ -38,19 +52,13 @@ mkfile () {
   mkdir -p "$(dirname "$path")"
   
   if [ ! -f "$path" ]; then
-    cat > "$path" <<EOF
-$content
-EOF
+    write_file "$path" "$content"
     echo "✓ Created $path"
   elif [ "$MODE" = "reset" ]; then
-    cat > "$path" <<EOF
-$content
-EOF
+    write_file "$path" "$content"
     echo "⚠ Reset $path (--reset)"
   elif [ "$MODE" = "upgrade" ] && [ "$is_rule" = true ]; then
-    cat > "$path" <<EOF
-$content
-EOF
+    write_file "$path" "$content"
     echo "✓ Updated $path (--upgrade)"
   elif [ "$MODE" = "check" ]; then
     echo "✓ Found $path"
@@ -62,11 +70,23 @@ EOF
 # Helper: check if file exists
 check_file () {
   local path="$1"
-  if [ -f "$path" ]; then
+  if [ -e "$path" ]; then
     echo "✓ $path"
     return 0
   else
     echo "✗ $path (missing)"
+    return 1
+  fi
+}
+
+# Helper: check if directory exists
+check_dir () {
+  local path="$1"
+  if [ -d "$path" ]; then
+    echo "✓ $path"
+    return 0
+  else
+    echo "✗ $path (missing dir)"
     return 1
   fi
 }
@@ -922,18 +942,18 @@ chmod +x linotype.sh 2>/dev/null || true
 if [ "$MODE" = "check" ]; then
   echo ""
   echo "Checking Linotype setup..."
-  local errors=0
+  errors=0
   
-  check_file "docs/context/app-context.md" || ((errors++))
-  check_file "docs/capabilities/registry.yml" || ((errors++))
-  check_file "docs/work/planning" || ((errors++))
-  check_file "docs/work/doing" || ((errors++))
-  check_file "docs/work/review" || ((errors++))
-  check_file "docs/work/done" || ((errors++))
-  check_file ".kiro/steering/workflow.md" || ((errors++))
-  check_file "linotype.sh" || ((errors++))
+  check_file "docs/context/app-context.md" || errors=$((errors+1))
+  check_file "docs/capabilities/registry.yml" || errors=$((errors+1))
+  check_dir  "docs/work/planning" || errors=$((errors+1))
+  check_dir  "docs/work/doing" || errors=$((errors+1))
+  check_dir  "docs/work/review" || errors=$((errors+1))
+  check_dir  "docs/work/done" || errors=$((errors+1))
+  check_file ".kiro/steering/workflow.md" || errors=$((errors+1))
+  check_file "linotype.sh" || errors=$((errors+1))
   
-  if [ $errors -eq 0 ]; then
+  if [ "$errors" -eq 0 ]; then
     echo ""
     echo "✓ All checks passed"
     exit 0
@@ -949,7 +969,11 @@ if [ "$MODE" = "reset" ]; then
   echo "⚠ Linotype v$CURRENT_VERSION reset complete"
   echo "WARNING: All docs have been reset to templates"
 elif [ "$MODE" = "upgrade" ]; then
-  echo "✓ Linotype v$CURRENT_VERSION upgraded"
+  if [ -n "$PREV_VERSION" ] && [ "$PREV_VERSION" != "$CURRENT_VERSION" ]; then
+    echo "✓ Upgraded from v$PREV_VERSION to v$CURRENT_VERSION"
+  else
+    echo "✓ Already on v$CURRENT_VERSION"
+  fi
   echo "Updated: rules, templates, linotype.sh"
   echo "Preserved: all work and docs"
 else
@@ -960,8 +984,10 @@ echo ""
 echo "Next steps:"
 echo "  1. ./linotype.sh init"
 echo "  2. Complete one SLUG-001 in docs/work/planning/"
-echo "  3. ./linotype.sh start SLUG-20250131-0900-bootstrap-linotype"
-echo "  4. Build, then ./linotype.sh review SLUG-20250131-0900-bootstrap-linotype"
+echo "     - SLUG-001.bootstrap-linotype.md (new product)"
+echo "     - SLUG-001.index-linotype.md (existing product)"
+echo "  3. ./linotype.sh start SLUG-001.bootstrap-linotype"
+echo "  4. Build, then ./linotype.sh review SLUG-001.bootstrap-linotype"
 echo ""
 echo "Commands:"
 echo "  ./linotype.sh list [stage]  - See all slugs"

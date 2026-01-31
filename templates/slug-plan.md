@@ -1,5 +1,8 @@
 # SLUG: SLUG-XXX <name>
 
+## Parent Galley
+(optional) GALLEY-YYYYMMDD-name
+
 ## Outcome
 Why this change exists.
 

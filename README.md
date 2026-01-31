@@ -77,6 +77,7 @@ After bootstrapping, you'll have:
 - [How to use](docs/how-to-use.md)
 - [Roles](docs/roles.md)
 - [Slug types](docs/slug-types.md)
+- [Galleys](docs/galleys.md) (v0.4 preview)
 - [FAQ](docs/faq.md)
 - [v3 changes](docs/v3.md)
 
