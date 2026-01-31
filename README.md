@@ -1,4 +1,4 @@
-# Linotype
+# Linotype 
 
 Linotype is an operating model for building complex products while keeping coherence over time.
 
