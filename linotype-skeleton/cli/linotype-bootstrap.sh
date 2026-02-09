@@ -34,17 +34,29 @@ copy_one() {
   fi
 }
 
+should_copy() {
+  # Never overwrite work-in-progress galleys and runs.
+  # Allow Linotype templates under docs/work/planning/_templates/** to bootstrap.
+  local rel="$1"
+  if [[ "$rel" == docs/work/* ]]; then
+    if [[ "$rel" == docs/work/planning/_templates/* ]]; then
+      return 0
+    fi
+    return 1
+  fi
+  return 0
+}
+
 if [[ "$MODE" = "check" ]]; then
   [[ -f "$DEST_DIR/docs/ai/_agent-rules.md" ]] && echo "✓ Linotype present" || echo "✗ Linotype missing"
   exit 0
 fi
 
-# Copy everything except docs/work/** (never overwrite work)
+# Copy everything except docs/work/** (never overwrite work),
+# but allow docs/work/planning/_templates/** (safe bootstrap assets).
 while IFS= read -r src; do
   rel="${src#"$SRC_DIR/"}"
-  if [[ "$rel" == docs/work/* ]]; then
-    continue
-  fi
+  if ! should_copy "$rel"; then continue; fi
   copy_one "$src" "$DEST_DIR/$rel"
 done < <(find "$SRC_DIR" -type f | sort)
 
