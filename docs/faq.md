@@ -1,59 +1,34 @@
 # FAQ
 
 ## Is this just process?
-It is a small set of artefacts and habits to prevent drift. If you do not need coherence over time, it may be unnecessary.
+It’s a small set of artefacts and habits to prevent drift. If you don’t need coherence over time, it may be unnecessary.
+
+## What are focus and optimise?
+In `docs/ai/_agent-rules.md`: **focus** (loose | standard | strict) controls scope discipline; **optimise** (speed | cost | quality) controls trade-off bias. Independent; both optional with defaults.
+
+## What’s AGENTS.md?
+Repo-root adapter for Linotype: minimum reading order, repo commands, conventions. If it conflicts with `docs/ai/_agent-rules.md`, the latter wins. See the skeleton’s `AGENTS.md` template.
 
 ## Do I need to use BMAD?
-Linotype assumes BMAD as the method inside a slug (Boundaries, Map, Analyse, Design, Build, Validate, Document), but stays lightweight and tool-agnostic.
+Linotype can assume BMAD inside a slug (Boundaries, Map, Analyse, Design, Build, Validate, Document). The operating model is method-agnostic.
 
 ## Will this slow me down?
-It slows down unclear work. It speeds up returning to context and delegating safely.
+It slows down unclear work; it speeds up returning to context and delegating (including to agents).
 
-## What's the difference between docs/context and docs/capabilities?
-- `docs/context/app-context.md` - High-level product snapshot (what/who/why)
-- `docs/capabilities/` - Detailed module specs and capability registry (how/where)
-
-Think of context as the 5-minute overview, capabilities as the detailed map.
+## What’s the difference between docs/context and docs/capabilities?
+Context/domain = high-level product snapshot (what/who/why). Capabilities = detailed module specs and registry (how/where). Agents use domain/index for minimal lookup.
 
 ## Do I need all the optional docs?
-No. Start with:
-- `docs/context/app-context.md`
-- `docs/capabilities/registry.yml`
-- Module specs in `docs/capabilities/modules/`
-
-Add `overview.md`, `architecture.md`, `glossary.md`, and `shared-standards.md` only when they add clarity.
+No. Start with work structure, `_agent-rules.md`, and `AGENTS.md`. Add overview, architecture, glossary, shared-standards only when they add clarity.
 
 ## Can I use this with Kiro or Cursor?
-Yes. The bootstrap script creates optional steering files in `.kiro/steering/` and a `CLAUDE.md` file. These help AI assistants understand your Linotype structure.
+Yes. The skeleton includes `.kiro/`, `.cursor/`, and `CLAUDE.md`; they reference `docs/ai/_agent-rules.md` as authoritative.
 
-## What if I don't want the full bootstrap structure?
-You can manually create just the parts you need:
-- `docs/work/{planning,doing,review,done}/`
-- `linotype.sh` script
-- Templates
-
-But the full bootstrap is recommended for consistency.
-
-## What's a Galley?
-A Galley is a temporary grouping of execution slugs that together realise one product change. It's owned by PDA and lives as a folder in `docs/work/planning/`. See [Galleys](galleys.md) for details.
+## What’s a Galley?
+A temporary grouping of slugs that realise one product change. Folder moves through planning → (queue) → doing → review → done. See [Galleys](galleys.md).
 
 ## Do I need to use Galleys?
-No. Galleys are optional. Use them when:
-- Multiple modules need to coordinate on a single product change
-- You want to preserve the "why" across multiple slugs
-- You're planning parallel work that needs sequencing
+Use galleys when coordinating multiple modules or slugs. Skip for small, single-slug changes.
 
-Skip Galleys for small, single-module changes.
-
-## Can a slug exist without a Galley?
-Yes. Slugs can exist independently. Use a Galley only when you need to coordinate multiple slugs.
-
-## Who creates Galleys?
-PDA (Product Design Authority) creates and owns Galleys. Module Owners execute the slugs within a Galley but don't edit the Galley itself.
-
-## What's the difference between a Galley and a Directional slug?
-Both are planning artefacts:
-- **Directional slug**: Explores options for a single module, outputs a decision
-- **Galley**: Coordinates multiple modules, outputs a product change
-
-Use Directional slugs for decisions. Use Galleys for coordinated work.
+## What’s the difference between a Galley and a Directional slug?
+Directional slug: explore/decide (single module). Galley: coordinate and deliver (multiple modules). See [slug-types](slug-types.md).

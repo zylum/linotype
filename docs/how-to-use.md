@@ -1,50 +1,43 @@
 # How to use Linotype
 
 ## Workflow
-Slugs move through stages:
-planning → doing → review → done
 
-Use `./linotype.sh` to move slugs between stages. Do not move files manually.
+Galleys (folders containing slugs) move through stages: planning → (queue) → doing → review → done. Use the CLI to create and move galleys; do not move folders manually.
 
 ## Commands
 
-Initialize the structure:
+From repo root, use `cli/linotype` (or `./cli/linotype.sh`):
+
+Create a galley:
 ```bash
-./linotype.sh init
+cli/linotype galley new <galley-name>
 ```
 
-Start working on a slug (moves from planning to doing):
+Move a galley:
 ```bash
-./linotype.sh start SLUG-002.first-vertical-slice
+cli/linotype galley move <galley-name> planning|doing|review|done
 ```
 
-Check if a slug is ready for review:
+List galleys by stage:
 ```bash
-./linotype.sh check SLUG-002.first-vertical-slice
+cli/linotype galley list
 ```
 
-Move to review (requires proof in build notes):
+Auto-move galleys when slugs are ready (e.g. all slugs done → review):
 ```bash
-./linotype.sh review SLUG-002.first-vertical-slice
+cli/linotype galley auto
 ```
 
-Complete a slug (moves from review to done):
-```bash
-./linotype.sh done SLUG-002.first-vertical-slice
-```
+Add slugs under the galley (e.g. `cli/linotype slug new <galley-name> <slug-name>` if your CLI supports it), then move the galley to `doing` when work starts, and to `review` when all slugs are complete.
 
 ## Small fixes
-For trivial changes (single file, low risk):
-- implement directly
-- log in `docs/work/doing/small-fixes.md`
 
-If you want traceability, create a slug instead.
+For trivial changes (single file, low risk): implement directly and log in `docs/work/doing/small-fixes.md` (or equivalent). For traceability, create a slug inside a galley instead.
 
-## Proof requirement
-Before a slug can move to review, build notes must include proof with at least one filled item:
-- URL: (preview link)
-- Screenshot: (path to image)
-- Commit / diff: (git reference)
-- Test output: (test results)
+## Proof and commits
 
-The script will enforce this requirement.
+Per slug: record what changed, checks run, and decisions in the slug file. Commit: `slug:<slug-name> done - <summary> #galley:<galley-name>`. When the galley is complete: move to `review/`, then commit `galley:<galley-name> ready for review - <summary>`.
+
+## Agent rules and repo adapter
+
+Agents must follow `docs/ai/_agent-rules.md` (focus, optimise, roles, scope). Repo-specific behaviour (commands, conventions) is in root `AGENTS.md`; it adapts Linotype to this repository. See [v4](v4.md) and [quick-reference](quick-reference.md).

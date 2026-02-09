@@ -1,0 +1,6 @@
+# GitHub Pages (publish from main branch / docs folder)
+title: Linotype
+description: An operating model that keeps products coherent over time
+baseurl: "/linotype"
+url: "https://zylum.github.io"
+theme: jekyll-theme-cayman

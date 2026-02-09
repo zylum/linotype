@@ -1,56 +1,32 @@
 # Galleys
 
-A Galley is a temporary grouping of execution slugs that together realise one product change.
+A Galley is a temporary grouping of slugs that together realise one product change. The galley folder moves through stages; slugs live inside it.
 
 ## What is a Galley?
 
-**Galley = Intent + Decomposition, not Delivery**
+- **Intent + decomposition**: README (brief), optional context/research; slugs do the work
+- **Coordination point**: for parallel work and handoff (e.g. via queue)
+- **Owned by PDA**; executed by Module Architect/Executor(s)
 
-A Galley is:
-- A planning artefact owned by PDA
-- A folder containing a brief and supporting research
-- A way to group related slugs without forcing hierarchy
-- A coordination point for parallel module work
-
-A Galley is NOT:
-- A unit of work (slugs are)
-- A container for implementation
-- A replacement for module autonomy
-- Required for every slug
+A Galley is not a unit of work (slugs are), not a replacement for module autonomy, and not required for every change—use one when multiple modules or slugs need to coordinate.
 
 ## When to use a Galley
 
-Use a Galley when:
-- Multiple modules need to coordinate on a single product change
-- You want to preserve the "why" across multiple slugs
-- You're planning parallel work that needs sequencing
-- You want to track integration and learnings
+Use when: multiple modules need to coordinate on one product change; you want to preserve “why” across slugs; you’re planning parallel work with sequencing. Skip for small single-slug changes or pure exploration (directional slug).
 
-Skip a Galley when:
-- The change is small and fits in one slug
-- It's a standalone fix in a single module
-- You're still exploring (use a Directional slug instead)
+## Galley structure and naming
 
-## Galley structure
-
-A Galley lives as a folder in `docs/work/planning/`:
+A Galley is a folder under `docs/work/{planning,queue,doing,review,done}/`. Naming: `yyyymmdd-<name>` or `yyyymmdd-<group>-<name>` (kebab-case). Example: `20260209-auth-passkeys`.
 
 ```
-docs/work/planning/GALLEY-YYYYMMDD-name/
-├── README.md              (the Galley brief)
-├── research-notes.md      (optional)
-├── architecture.md        (optional)
-├── ux-sketches.md         (optional)
-└── assumptions.md         (optional)
+docs/work/planning/20260209-auth-passkeys/
+├── README.md       (brief)
+├── context.md      (optional)
+├── review.md       (filled at review; learnings, decisions)
+└── slugs/          (or per-repo layout)
+    ├── auth-backend.md
+    └── ui-login.md
 ```
-
-### GALLEY-YYYYMMDD-name format
-
-- `GALLEY` - Prefix (like SLUG)
-- `YYYYMMDD` - Date created
-- `name` - Descriptive name (kebab-case)
-
-Example: `GALLEY-20250201-user-auth-redesign`
 
 ## What goes in a Galley README
 
@@ -63,9 +39,8 @@ What will users be able to do that they can't today?
 Which modules will change? List each with one line of impact.
 
 ### Execution slugs
-Explicit list of slugs to be created:
-- SLUG-XXX: Description (primary module)
-- SLUG-YYY: Description (primary module)
+Explicit list of slugs (names and descriptions):
+- slug-name: Description (primary module)
 
 ### Constraints
 What must be true? What can't change?
@@ -83,178 +58,41 @@ How do we know this Galley is complete?
 - Top-level docs updated
 - PDA sign-off
 
-## Execution slugs reference their Galley
-
-Each slug created from a Galley includes:
-
-```markdown
-## Parent Galley
-GALLEY-20250201-user-auth-redesign
-```
-
-This gives traceability: you can always see why a slug exists.
+Slugs live inside the galley folder (e.g. `slugs/*.md`), so the galley is implicit. For traceability, slug files can note the galley name in a header if needed.
 
 ## Galley lifecycle
 
-### 1. Planning
-PDA creates the Galley folder and README.
-Includes research, assumptions, non-goals.
-No implementation yet.
+Stages: `planning` | `queue` | `doing` | `review` | `done`. Move with CLI: `cli/linotype galley move <galley-name> <stage>`.
 
-### 2. Slug creation
-PDA creates execution slugs (as files, not in the Galley folder).
-Each slug references the parent Galley.
-Module Owners review and start work.
+1. **Planning** — PDA creates galley (e.g. `cli/linotype galley new <name>`), README, slugs. No implementation yet.
+2. **Queue** (optional) — Move to `queue/` when ready for handoff. Only move from queue to doing to **claim** (first successful move wins).
+3. **Doing** — Move to `doing/` when work starts. One active Executor per galley; execute slugs, run checks, commit per slug.
+4. **Review** — When all slugs are done, move to `review/`. Update galley README if needed; fill `review.md` (learnings, decisions).
+5. **Done** — Move to `done/` when integration is verified and PDA (or reviewer) signs off.
 
-### 3. Parallel execution
-Each slug moves through planning → doing → review → done independently.
-Module Owners own their slugs.
-PDA monitors progress.
+Do not leave a finished galley in `doing/`.
 
-### 4. Integration review
-When all slugs are in review/done:
-- PDA verifies combined system realises original intent
-- Top-level docs (app-context, registry) are updated
-- Learnings are captured
-- Follow-on Galleys created if scope changed
+## Queue and parallel workflow
 
-### 5. Completion
-Galley is "complete" when:
-- All child slugs are in done
-- Integration is tested
-- PDA signs off on intent vs reality
+- **Claiming**: Only move galleys from `queue` to `doing`. First successful move claims the galley. If move fails (no longer in queue), pick another galley.
+- **Branch**: One branch per galley, e.g. `slug/<galley-id>-<galley-name>`.
+- **Worktrees**: In parallel mode, one git worktree per active galley; each worktree checks out its galley branch.
+- **Conflict avoidance**: One active galley per worktree; no two Executors on the same galley. If conflicts occur, stop and record in galley `review.md`.
 
-## PDA responsibilities in a Galley
+## PDA and Module Owner (summary)
 
-Define the user outcome
-- What problem does this solve?
-- What's the measurable change?
+**PDA**: Define outcome, impacted modules, slugs, constraints, non-goals, sequencing. Validate integration when all slugs are done; update top-level docs; capture learnings.
 
-Identify impacted modules
-- Which modules will change?
-- What's the scope of each?
-
-Explicitly list execution slugs
-- What work needs to happen?
-- In what order?
-- Who owns each?
-
-Define constraints and non-goals
-- What must stay true?
-- What are we NOT doing?
-
-Decide sequencing and readiness
-- Can work be parallel?
-- Are there dependencies?
-- When is it safe to integrate?
-
-## Module Owner responsibilities
-
-Execute assigned slugs
-- Own the implementation
-- Update module docs
-- Provide proof
-
-Respect Galley boundaries
-- Don't expand scope beyond the Galley
-- Don't create new slugs outside the Galley
-- Flag scope changes to PDA
-
-Communicate progress
-- Update slug status
-- Flag blockers early
-- Suggest follow-on work
+**Module Owner / Executor**: Execute slugs, update module docs, provide proof, respect galley scope. Flag scope changes to PDA; record decisions in slug/review artefacts.
 
 ## Example: User authentication redesign
 
-```
-GALLEY-20250201-user-auth-redesign/
-├── README.md
-├── research-notes.md
-└── architecture.md
-```
+Galley `20260209-auth-passkeys`. README: user outcome (passkey login), impacted modules (auth, ui, api), slugs (e.g. auth-backend, ui-login, api-endpoints), constraints (backward compatibility, iOS/Android), non-goals (deprecate passwords later), sequencing (backend first; UI after API), integration criteria (all slugs done, E2E pass, app-context updated). See [examples/galley-example.md](examples/galley-example.md) for full README and slug samples.
 
-### README content
+## Galley vs directional slug
 
-**User outcome**
-Users can now log in with passkeys, reducing friction and improving security.
+**Directional slug**: explore options, make a decision (single module); output is a decision. **Galley**: coordinate multiple modules; output is integrated product change. Example: directional = “Passkeys or WebAuthn?”; galley = “Implement passkey support across auth, ui, api.”
 
-**Impacted modules**
-- auth: Implement passkey support
-- ui: Update login form
-- api: Add passkey endpoints
+## Agents
 
-**Execution slugs**
-- SLUG-042: Implement passkey backend (auth)
-- SLUG-043: Update login UI (ui)
-- SLUG-044: Add passkey API endpoints (api)
-
-**Constraints**
-- Must maintain backward compatibility with password login
-- Must work on iOS and Android
-- Must not break existing sessions
-
-**Non-goals**
-- Deprecating passwords (future Galley)
-- Biometric integration (future Galley)
-- Admin passkey management (future Galley)
-
-**Sequencing**
-1. SLUG-042 (backend) - can start immediately
-2. SLUG-043 (UI) - depends on SLUG-042 API
-3. SLUG-044 (API) - can start with SLUG-042
-
-**Integration criteria**
-- All three slugs in done
-- E2E tests pass on both platforms
-- app-context.md updated with new auth flow
-- No regressions in existing auth tests
-
-## Galley vs Directional slug
-
-Both are planning artefacts. When to use each?
-
-**Use Directional slug when:**
-- Exploring options for a single module
-- Making a decision that affects one module
-- Output is a decision, not a product change
-
-**Use Galley when:**
-- Coordinating multiple modules
-- Realising a product change
-- Output is integrated, working software
-
-Example:
-- Directional slug: "Should we use passkeys or WebAuthn?"
-- Galley: "Implement passkey support across auth, ui, and api"
-
-## Galley and agents
-
-Agents (Claude, Kiro) respect Galley boundaries:
-
-Agents may:
-- Operate as PDA assistants within a Galley (help write the brief)
-- Operate as Module Owners within a single execution slug
-- Suggest follow-on Galleys based on learnings
-
-Agents never:
-- Invent new Galleys
-- Change Galley intent
-- Span multiple execution slugs at once
-- Create slugs outside a Galley's scope
-
-This keeps agents predictable and trustworthy.
-
-## Keeping track of what we've built
-
-Execution slugs are responsible for:
-- Updating module specs
-- Updating features
-- Updating decisions when boundaries change
-
-Galley responsibility:
-- Ensure the overall product narrative still makes sense
-- Capture learnings or follow-on Galleys if scope changed
-- Update app-context.md if user-facing behaviour changed
-
-This reinforces Linotype as system memory for humans and agents.
+Agents follow `docs/ai/_agent-rules.md` and repo `AGENTS.md`. Orchestrator shapes galleys/slugs and moves lifecycle; Executor runs slugs and commits. One active Executor per galley. Agents don’t invent galleys, change intent, or span multiple slugs at once. Slugs update module specs and decisions; galley captures learnings and updates app-context when user-facing behaviour changes.

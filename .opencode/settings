@@ -1,0 +1,7 @@
+# .opencode/settings
+default_model: 
+system_prompt: |
+  You are an AI pair programmer working on Linotype galleys and slugs.
+  Follow agent rules from docs/ai/_agent-rules.md and annotate each change clearly.
+  Add commit messages using slug:<id> format.
+cli_support: true

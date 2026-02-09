@@ -4,43 +4,14 @@ This document explains the folder structure and key artefacts.
 
 ## Core artefacts
 
-### docs/context/app-context.md
-High-level product snapshot. Answers:
-- What is this product?
-- Who uses it?
-- What are the key journeys?
-- What domains/modules exist?
-- What constraints apply?
-
-Keep this thin and readable in under 5 minutes.
-
-### docs/capabilities/registry.yml
-Central registry of capabilities. Maps what the product can do to which modules own them.
-
-### docs/capabilities/modules/
-One folder per module. Each contains:
-- `spec.md` - Purpose, boundaries, data ownership, key flows
-- `features.md` - Feature status table
-- `decisions.md` - Log of boundary/contract changes
+### docs/domain/ or docs/context/
+Product/domain snapshot (e.g. `docs/domain/index.md` or `docs/context/app-context.md`). Agents use it for lookup; keep it minimal. Optional: capability registry and module specs under `docs/capabilities/` or equivalent.
 
 ### docs/work/
-Slug workflow stages:
-- `planning/` - Slugs waiting to start (and Galley folders)
-- `doing/` - Active work
-- `review/` - Awaiting validation
-- `done/` - Completed slugs
+Galley workflow stages: `planning/`, optional `queue/`, `doing/`, `review/`, `done/`. Each stage contains galley folders (e.g. `yyyymmdd-<name>/`). Inside a galley: `README.md`, optional `context.md`, `review.md`, and slugs (e.g. `slugs/*.md`). Move galleys with `cli/linotype galley move <galley-name> <stage>`.
 
-Each slug has:
-- `SLUG-XXX.name.md` - The plan
-- `SLUG-XXX.name.build-notes.md` - Implementation notes (created when started)
-
-Galleys live as folders in `planning/`:
-- `GALLEY-YYYYMMDD-name/` - Galley folder
-  - `README.md` - The Galley brief
-  - Optional supporting files (research, architecture, etc.)
-
-### docs/templates/
-Templates for creating new slugs and build notes.
+### docs/ai/
+Agent contract: `_agent-rules.md` (authoritative; focus, optimise, roles, scope). Repo root `AGENTS.md` adapts Linotype to the repo (min reading order, commands, conventions).
 
 ## Optional artefacts
 
@@ -58,23 +29,11 @@ Conventions that apply across modules.
 
 ## Workflow automation
 
-### linotype.sh
-Script for moving slugs through stages:
-- `init` - Create folder structure
-- `start <slug>` - Move from planning to doing, create build notes
-- `check <slug>` - Verify slug is ready for review
-- `review <slug>` - Move to review (requires proof)
-- `done <slug>` - Complete the slug
+### cli/linotype (or cli/linotype.sh)
+Galley-centric commands: `galley new`, `galley move <name> <stage>`, `galley list`, `galley auto`; optionally `slug new`. Stages: planning, (queue), doing, review, done. Use from repo root.
 
-## Bootstrap files
-
-### linotype-bootstrap.sh
-Downloads and sets up Linotype structure in a new project. Creates:
-- All core documentation files
-- Starter slugs (SLUG-001 and SLUG-002)
-- Templates
-- Workflow script
-- Optional Kiro/Cursor integration files
+### Bootstrap
+Skeleton provides `cli/linotype-bootstrap.sh`, `docs/ai/_agent-rules.md`, and root `AGENTS.md` template. Copy or run bootstrap to create work dirs, templates, and agent rules.
 
 ## Principles
 

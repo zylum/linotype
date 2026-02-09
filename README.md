@@ -2,7 +2,7 @@
 
 Linotype is an operating model for building complex products while keeping coherence over time.
 
-**🌐 Website:** [linotype-site.vercel.app](https://linotype-site.vercel.app)
+**🌐 Website:** [GitHub Pages](https://zylum.github.io/linotype/) (docs in this repo). To enable: **Settings → Pages → Source:** Deploy from branch → **Branch:** main, **Folder:** /docs.
 
 - Method: BMAD (how you plan and build inside a Slug)
 - Operating model: Linotype (how the system stays coherent across Slugs)

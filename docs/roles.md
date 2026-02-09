@@ -1,53 +1,30 @@
 # Roles
 
-## Product Design Authority (PDA)
-Owns system coherence over time.
+## Agent roles (Linotype contract)
 
-### Responsibilities
-- Frames change and sequences work
-- Creates Galleys to coordinate multi-module changes
-- Breaks work into execution slugs
-- Validates end-to-end coherence at review
-- Ensures top-level docs stay in sync with reality
+Defined in `docs/ai/_agent-rules.md`. Any agent (Cursor, Kiro, OpenCode, etc.) should follow these; repo-specific behaviour is in `AGENTS.md`.
 
-### In a Galley
-- Defines user outcome
-- Identifies impacted modules
-- Explicitly lists execution slugs
-- Defines constraints and non-goals
-- Decides sequencing and readiness for integration
-- Validates integration when all slugs are complete
+### Orchestrator
+- Shape and sequence work (create/refine galleys and slugs)
+- Move galley lifecycle state (`cli/linotype galley move`)
+- Keep scope explicit; apply small fixes and polish
+- Review outcomes and record decisions
 
-## Module Architect
-Owns a module's correctness and evolution.
+### Executor
+- Execute slugs (docs/code changes)
+- Run checks/tests where available
+- Commit using required formats (slug done, galley ready for review)
+- Record decisions and follow-ups in review artefacts
 
-### Responsibilities
-- Designs and builds within module boundaries
-- Validates locally
-- Updates module docs and decisions
-- Executes assigned slugs
-- Respects Galley boundaries (doesn't expand scope)
+A galley has exactly one active Executor at a time. One person or tool may perform both roles.
 
-### In a Galley
-- Executes assigned execution slugs
-- Updates module specs and features
-- Flags scope changes to PDA
-- Communicates progress
+## Human roles (ownership)
 
-## Builder
-Executes a build slug within boundaries.
-Often the same person as Module Architect in small teams.
+### Product Design Authority (PDA)
+Owns system coherence. Frames change, creates galleys, breaks work into slugs, validates integration, keeps top-level docs aligned. In a galley: defines outcome, impacted modules, slugs, constraints, non-goals, sequencing.
 
-## Reviewer
-Verifies proof and coherence before completion.
-In solo use, this is often the PDA role.
+### Module Architect
+Owns a module’s correctness. Designs and builds within boundaries, validates locally, updates module docs, executes assigned slugs, respects galley scope. In a galley: executes slugs, updates specs, flags scope changes to PDA.
 
-### Slug-level review
-- Does this slug meet its acceptance checks?
-- Is Proof present?
-- Are module docs updated?
-
-### Galley-level integration review (PDA)
-- Are all child slugs complete?
-- Does the combined system realise the original intent?
-- Do top-level docs still describe reality?
+### Builder / Reviewer
+Builder: executes build slugs (often same as Module Architect). Reviewer: verifies proof and coherence; slug-level (acceptance, proof, docs) and galley-level (all slugs done, intent realised, docs current). Solo use: PDA often does review.
