@@ -17,6 +17,7 @@ usage() {
 Linotype CLI
 
 Usage:
+  cli/linotype init
   cli/linotype galley new <galley-name>
   cli/linotype galley move <galley-name> planning|queue|doing|review|done
   cli/linotype galley list
@@ -241,6 +242,21 @@ cmd_galley_new() {
   render_template "$TEMPLATES_DIR/galley/run-sheet.md" "$galley_dir/run-sheet.md" "$galley"
 
   ok "Created: docs/work/planning/$galley/"
+}
+
+cmd_init() {
+  ensure_dirs
+  # SLUG-001: two variants (bootstrap = new product, index = existing product); SLUG-002: first vertical slice
+  local starters=( "slug-001-bootstrap-linotype" "slug-001-index-linotype" "slug-002-first-vertical-slice" )
+  local g
+  for g in "${starters[@]}"; do
+    if [ ! -d "$PLANNING_DIR/$g" ]; then
+      cmd_galley_new "$g"
+    else
+      echo "⊘ $g (exists)"
+    fi
+  done
+  ok "Init complete. Starter galleys: ${starters[*]}"
 }
 
 cmd_galley_move() {
@@ -553,6 +569,7 @@ main() {
   ensure_dirs
   local cmd="${1:-}"; shift || true
   case "$cmd" in
+    init) cmd_init "$@" ;;
     galley)
       local sub="${1:-}"; shift || true
       case "$sub" in

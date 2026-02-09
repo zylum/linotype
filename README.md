@@ -28,27 +28,29 @@ This creates:
 ### Next steps
 
 1. Complete SLUG-001 (choose one):
-   - `docs/work/planning/SLUG-001.bootstrap-linotype.md` (new product)
-   - `docs/work/planning/SLUG-001.index-linotype.md` (existing product)
+   - `docs/work/planning/slug-001-bootstrap-linotype/` (new product)
+   - `docs/work/planning/slug-001-index-linotype/` (existing product)
 
-2. Start your first slug:
+2. Move a galley to queue and start work:
    ```bash
-   ./linotype.sh start SLUG-002.first-vertical-slice
+   ./linotype.sh galley move slug-002-first-vertical-slice queue
    ```
 
-3. Do the work, add proof to build notes, then:
+3. When ready, move to review and then done:
    ```bash
-   ./linotype.sh review SLUG-002.first-vertical-slice
-   ./linotype.sh done SLUG-002.first-vertical-slice
+   ./linotype.sh galley move slug-002-first-vertical-slice review
+   ./linotype.sh galley move slug-002-first-vertical-slice done
    ```
 
 ### Key commands
 
 ```bash
-./linotype.sh start <slug-name>   # Move from planning to doing
-./linotype.sh check <slug-name>   # Verify ready for review
-./linotype.sh review <slug-name>  # Move to review (requires proof)
-./linotype.sh done <slug-name>    # Complete the slug
+./linotype.sh galley new <galley-name>              # Create a galley
+./linotype.sh galley move <galley-name> queue       # Move to queue (ready for work)
+./linotype.sh galley move <galley-name> doing       # Move to doing (in progress)
+./linotype.sh galley move <galley-name> review      # Move to review
+./linotype.sh galley move <galley-name> done        # Complete the galley
+./linotype.sh galley list                          # List all galleys
 ```
 
 See [Quick Reference](docs/quick-reference.md) for more.
@@ -67,7 +69,7 @@ After bootstrapping, you'll have:
 - `docs/capabilities/` - Module specs and capability registry
 - `docs/work/` - Slug workflow (planning/doing/review/done)
 - `docs/templates/` - Templates for slugs and build notes
-- `linotype.sh` - Workflow automation script
+- `linotype.sh` - Workflow automation script (wrapper for `cli/linotype.sh`)
 
 ## Documentation
 
