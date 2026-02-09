@@ -10,7 +10,7 @@ Create and move galleys (not individual slugs). Use `cli/linotype` from repo roo
 
 ```bash
 cli/linotype galley new <galley-name>              # e.g. 20260209-auth-passkeys
-cli/linotype galley move <galley-name> <stage>     # planning | doing | review | done
+cli/linotype galley move <galley-name> <stage>     # planning | queue | doing | review | done
 cli/linotype galley list
 cli/linotype galley auto                           # auto-move when slugs ready
 ```
@@ -19,7 +19,7 @@ Optional: use a **queue** stage for handoff—move to `queue/` when ready; only 
 
 ## File locations
 
-Galleys (folders) live under `docs/work/{planning,doing,review,done}/`; slugs live inside each galley (e.g. `slugs/` or per-repo layout). Domain index: `docs/domain/index.md`. Agent rules: `docs/ai/_agent-rules.md`; repo adapter: `AGENTS.md`.
+Galleys under `docs/work/{planning,queue,doing,review,done}/`; slugs inside each galley. Domain index: `docs/domain/index.md`. Agent rules: `docs/ai/_agent-rules.md`; repo adapter: `AGENTS.md`.
 
 ## Focus and optimise
 
@@ -29,6 +29,6 @@ In `docs/ai/_agent-rules.md`: **focus** = loose | standard | strict (scope disci
 
 Per slug: update slug file with what changed, checks run, decisions. Commit: `slug:<slug-name> done - <summary> #galley:<galley-name>`. When galley complete: move to `review/`, then commit `galley:<galley-name> ready for review - <summary>`.
 
-## Parallel work
+## Parallel work and handoff
 
-One branch per galley (e.g. `slug/<galley-id>-<galley-name>`). One worktree per active galley if parallel. One active Executor per galley; conflicts → record in galley `review.md`.
+One branch per galley; one worktree per active galley. One active Executor per galley; conflicts → record in galley `review.md`. Handoff: `cli/linotype exec opencode <galley>` generates executor brief from galley run-sheet and (if configured) launches executor.

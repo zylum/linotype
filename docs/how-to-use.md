@@ -15,7 +15,7 @@ cli/linotype galley new <galley-name>
 
 Move a galley:
 ```bash
-cli/linotype galley move <galley-name> planning|doing|review|done
+cli/linotype galley move <galley-name> planning|queue|doing|review|done
 ```
 
 List galleys by stage:

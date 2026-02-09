@@ -79,7 +79,8 @@ After bootstrapping, you'll have:
 - [Slug types](docs/slug-types.md)
 - [Galleys](docs/galleys.md) (v0.4 preview)
 - [FAQ](docs/faq.md)
-- [v3 changes](docs/v3.md)
+- [v0.3 changes](docs/v3.md)
+- [v0.4 changes](docs/v4.md)
 
 ## License
 

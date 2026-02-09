@@ -79,11 +79,9 @@ Do not leave a finished galley in `doing/`.
 - **Worktrees**: In parallel mode, one git worktree per active galley; each worktree checks out its galley branch.
 - **Conflict avoidance**: One active galley per worktree; no two Executors on the same galley. If conflicts occur, stop and record in galley `review.md`.
 
-## PDA and Module Owner (summary)
+## Ownership and agents
 
-**PDA**: Define outcome, impacted modules, slugs, constraints, non-goals, sequencing. Validate integration when all slugs are done; update top-level docs; capture learnings.
-
-**Module Owner / Executor**: Execute slugs, update module docs, provide proof, respect galley scope. Flag scope changes to PDA; record decisions in slug/review artefacts.
+**PDA**: Outcome, modules, slugs, constraints, sequencing; validate integration and update top-level docs. **Module Owner / Executor**: Execute slugs, update module docs, provide proof; flag scope changes to PDA. Agents follow `docs/ai/_agent-rules.md` and `AGENTS.md`; one active Executor per galley. Run-sheet (per galley) drives execution; `cli/linotype exec opencode <galley>` generates executor brief for handoff.
 
 ## Example: User authentication redesign
 
@@ -91,8 +89,5 @@ Galley `20260209-auth-passkeys`. README: user outcome (passkey login), impacted 
 
 ## Galley vs directional slug
 
-**Directional slug**: explore options, make a decision (single module); output is a decision. **Galley**: coordinate multiple modules; output is integrated product change. Example: directional = “Passkeys or WebAuthn?”; galley = “Implement passkey support across auth, ui, api.”
+**Directional slug**: explore/decide (single module). **Galley**: coordinate multiple modules; deliver integrated change. Example: directional = "Passkeys or WebAuthn?"; galley = "Implement passkey support across auth, ui, api."
 
-## Agents
-
-Agents follow `docs/ai/_agent-rules.md` and repo `AGENTS.md`. Orchestrator shapes galleys/slugs and moves lifecycle; Executor runs slugs and commits. One active Executor per galley. Agents don’t invent galleys, change intent, or span multiple slugs at once. Slugs update module specs and decisions; galley captures learnings and updates app-context when user-facing behaviour changes.

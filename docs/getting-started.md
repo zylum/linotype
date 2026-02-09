@@ -22,13 +22,7 @@ Your first steps with Linotype.
 
 ## What’s next?
 
-- [How to use](how-to-use.html) — Workflow and CLI in detail  
+- [How to use](how-to-use.html) — Workflow and CLI  
 - [Quick reference](quick-reference.html) — Commands and structure  
 - [Galleys](galleys.html) — Lifecycle, queue, parallel work  
-- [FAQ](faq.html) — Common questions  
-
-## Principles
-
-1. Use `cli/linotype galley move` to change stages (don’t move folders manually).
-2. One active Executor per galley; record proof and decisions in slug/review artefacts.
-3. Keep docs in sync with reality; prefer small, delegable slugs.
+- [FAQ](faq.html) — Common questions
