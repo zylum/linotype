@@ -7,6 +7,8 @@ title: Linotype
 
 An operating model that keeps products coherent over time.
 
+**On this page:** [What it is](#what-it-is) · [Why Linotype?](#why-linotype) · [Learning path](#learning-path) · [Reference](#reference) · [Quick links](#quick-links) · [History](#history)
+
 ## What it is
 
 **Linotype** gives you a lightweight way to keep docs, code, and decisions in sync as work flows between humans and AI agents. Slugs are the smallest delegable units of work; galleys group them into one product change. Everything stays in one place and stays findable.
@@ -49,6 +51,11 @@ AI-assisted development is fast, but coherence is fragile. Without structure, do
 | [v4](v4.html) | v4: focus, optimise, parallel, agent contract |
 | [Templates](templates.html) | Starter slugs and usage |
 | [Changelog](changelog.html) | Version history |
+| [History](history.html) | How Linotype emerged; scale-of-contribution, PDA, slugs |
+
+## History
+
+How Linotype emerged from real-world challenges with AI-assisted development. **[Full history →](history.html)**
 
 ## Quick links
 
