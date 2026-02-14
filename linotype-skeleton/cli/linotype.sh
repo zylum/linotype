@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DOCS_DIR="$ROOT_DIR/docs"
+LEARNING_DIR="$DOCS_DIR/learning"
 WORK_DIR="$DOCS_DIR/work"
 PLANNING_DIR="$WORK_DIR/planning"
 QUEUE_DIR="$WORK_DIR/queue"
@@ -11,6 +12,12 @@ REVIEW_DIR="$WORK_DIR/review"
 DONE_DIR="$WORK_DIR/done"
 BUNDLES_DIR="$ROOT_DIR/dist/bundles"
 TEMPLATES_DIR="$PLANNING_DIR/_templates"
+
+LEARNING_INBOX_DIR="$LEARNING_DIR/inbox"
+LEARNING_SIGNALS_DIR="$LEARNING_DIR/signals"
+LEARNING_PROPOSALS_DIR="$LEARNING_DIR/proposals"
+LEARNING_SNAPSHOTS_DIR="$LEARNING_DIR/snapshots"
+LEARNING_TEMPLATES_DIR="$LEARNING_DIR/_templates"
 
 usage() {
   cat <<'USAGE'
@@ -27,11 +34,18 @@ Usage:
   cli/linotype bundle ai <galley-name>
   cli/linotype bundle project
   cli/linotype bundle review [--since 30d|7d|YYYY-WW|all] [--weekly]
+  cli/linotype bundle snapshot [--app <app>] [--area <area>]
+  cli/linotype signal add "<description>" [--app <app>] [--area <area>] [--type <type>] [--status <status>] [--pointer <pointer>]
+  cli/linotype signal normalise [--app <app>] [--area <area>]
   cli/linotype bundle review --weekly   # writes docs/review/weekly/YYYY-WW.md (schedule weekly)
 
 Notes:
 - galley-name: kebab-case, prefer YYYYMMDD-topic (e.g. 20260206-model-compare)
 - slug-name: kebab-case, e.g. auth-login
+-
+Learning layer:
+- Raw reflections can be dropped into docs/learning/inbox/ (any format).
+- Signals are written to docs/learning/signals/ using YYYY-MM-DD__app__area__signals__daily.md.
 
 USAGE
 }
@@ -45,6 +59,7 @@ fail() { printf "✗ %s
 
 ensure_dirs() {
   mkdir -p "$PLANNING_DIR" "$QUEUE_DIR" "$DOING_DIR" "$REVIEW_DIR" "$DONE_DIR" "$BUNDLES_DIR"
+  mkdir -p "$LEARNING_INBOX_DIR" "$LEARNING_SIGNALS_DIR" "$LEARNING_PROPOSALS_DIR" "$LEARNING_SNAPSHOTS_DIR" "$LEARNING_TEMPLATES_DIR"
 }
 
 kebab_case() {
@@ -65,6 +80,72 @@ render_template() {
     cat > "$dest" <<EOF
 # ${galley}
 EOF
+  fi
+}
+
+today_iso() { date +%Y-%m-%d; }
+
+learning_daily_signals_file() {
+  local app="${1:-linotype}" area="${2:-core}" d
+  d="$(today_iso)"
+  printf "%s/%s__%s__%s__signals__daily.md" "$LEARNING_SIGNALS_DIR" "$d" "$app" "$area"
+}
+
+learning_daily_snapshot_file() {
+  local app="${1:-linotype}" area="${2:-core}" d
+  d="$(today_iso)"
+  printf "%s/%s__%s__%s__snapshot__daily.md" "$LEARNING_SNAPSHOTS_DIR" "$d" "$app" "$area"
+}
+
+signal_next_id() {
+  # Find max S-### across signals + weekly reconcile files; default S-001.
+  local max="0"
+  local f
+  shopt -s nullglob
+  for f in "$LEARNING_SIGNALS_DIR"/*.md "$LEARNING_SIGNALS_DIR"/*.markdown "$LEARNING_SIGNALS_DIR"/*.txt; do
+    [ -f "$f" ] || continue
+    # Extract numbers from S-### patterns.
+    local m
+    m="$(grep -Eo 'S-[0-9]{3,}' "$f" 2>/dev/null | sed -E 's/^S-//' | sort -n | tail -n1 || true)"
+    [ -n "$m" ] || continue
+    if [ "$m" -gt "$max" ] 2>/dev/null; then max="$m"; fi
+  done
+  shopt -u nullglob
+  printf "S-%03d" $((max + 1))
+}
+
+ensure_learning_templates() {
+  # Install minimal templates if missing (safe, idempotent).
+  local t
+  t="$LEARNING_TEMPLATES_DIR/signals-daily.md"
+  if [ ! -f "$t" ]; then
+    cat > "$t" <<'T'
+# Signals (daily)
+
+Date:
+App:
+Area:
+
+Format:
+- S-### [status] [type] [app/area] -> pointer | description
+
+Statuses:
+new | planned | done | failed | deferred | noise | reopened
+T
+  fi
+
+  t="$LEARNING_TEMPLATES_DIR/snapshot-daily.md"
+  if [ ! -f "$t" ]; then
+    cat > "$t" <<'T'
+# Snapshot (daily)
+
+Purpose: paste into ChatGPT/agents to avoid planning drift.
+
+Includes:
+- Galley stages summary
+- Latest signals
+- Recent review learnings (weekly, if present)
+T
   fi
 }
 
@@ -508,7 +589,7 @@ cmd_bundle_review() {
     local out_file="$REVIEW_DIR/weekly/${week_id}.md"
     {
       echo "# Weekly review ${week_id}"
-      echo "Generated: $(date -I)"
+      echo "Generated: $(today_iso)"
       echo ""
     } > "$out_file"
     shopt -s nullglob
@@ -565,6 +646,182 @@ cmd_bundle_review() {
   ok "Review bundle ready: ${out_dir#"$ROOT_DIR/"}"
 }
 
+cmd_bundle_snapshot() {
+  ensure_dirs
+  ensure_learning_templates
+
+  local app="linotype" area="core"
+  while [ $# -gt 0 ]; do
+    case "${1:-}" in
+      --app) app="${2:-linotype}"; shift 2 ;;
+      --area) area="${2:-core}"; shift 2 ;;
+      *) break ;;
+    esac
+  done
+
+  local out; out="$(learning_daily_snapshot_file "$app" "$area")"
+  mkdir -p "$(dirname "$out")"
+
+  local sig_file; sig_file="$(learning_daily_signals_file "$app" "$area")"
+
+  # Latest weekly review file (if any).
+  local latest_weekly=""
+  if [ -d "$REVIEW_DIR/weekly" ]; then
+    latest_weekly="$(ls -1 "$REVIEW_DIR/weekly"/*.md 2>/dev/null | sort | tail -n1 || true)"
+  fi
+
+  {
+    echo "# Daily snapshot"
+    echo
+    echo "Generated: $(date +%Y-%m-%dT%H:%M:%S)"
+    echo "App: ${app}"
+    echo "Area: ${area}"
+    echo
+    echo "## Galley stages"
+    echo
+    # Reuse existing listing logic (printed, but not as commands).
+    cmd_galley_list
+    echo
+    echo "## Signals (today)"
+    echo
+    if [ -f "$sig_file" ]; then
+      cat "$sig_file"
+    else
+      echo "_No daily signals file found yet:_"
+      echo
+      echo "Expected: ${sig_file#"$ROOT_DIR/"}"
+      echo "Tip: cli/linotype signal add \"<description>\" --app $app --area $area"
+    fi
+    echo
+    echo "## Recent review learnings (latest weekly, if present)"
+    echo
+    if [ -n "$latest_weekly" ] && [ -f "$latest_weekly" ]; then
+      echo "Source: ${latest_weekly#"$ROOT_DIR/"}"
+      echo
+      cat "$latest_weekly"
+    else
+      echo "_No weekly review file found yet._"
+      echo
+      echo "Tip: cli/linotype bundle review --weekly"
+    fi
+  } > "$out"
+
+  ok "Snapshot written: ${out#"$ROOT_DIR/"}"
+}
+
+cmd_signal_add() {
+  ensure_dirs
+  ensure_learning_templates
+
+  local desc=""
+  local app="linotype" area="core" type="general" status="new" pointer="none"
+
+  # First positional is description (quoted).
+  if [ $# -gt 0 ]; then
+    desc="${1:-}"; shift || true
+  fi
+  if [ -z "$desc" ]; then
+    fail "Usage: cli/linotype signal add \"<description>\" [--app <app>] [--area <area>] [--type <type>] [--status <status>] [--pointer <pointer>]"
+    exit 1
+  fi
+
+  while [ $# -gt 0 ]; do
+    case "${1:-}" in
+      --app) app="${2:-linotype}"; shift 2 ;;
+      --area) area="${2:-core}"; shift 2 ;;
+      --type) type="${2:-general}"; shift 2 ;;
+      --status) status="${2:-new}"; shift 2 ;;
+      --pointer) pointer="${2:-none}"; shift 2 ;;
+      *) break ;;
+    esac
+  done
+
+  local out; out="$(learning_daily_signals_file "$app" "$area")"
+  mkdir -p "$(dirname "$out")"
+
+  if [ ! -f "$out" ]; then
+    # Seed with template header.
+    cat > "$out" <<EOF
+# Signals (daily)
+
+Date: $(today_iso)
+App: ${app}
+Area: ${area}
+
+Format:
+- S-### [status] [type] [app/area] -> pointer | description
+
+Statuses:
+new | planned | done | failed | deferred | noise | reopened
+
+## Items
+
+EOF
+  fi
+
+  local sid; sid="$(signal_next_id)"
+  printf -- "- %s [%s] [%s] [%s/%s] -> %s | %s\n" "$sid" "$status" "$type" "$app" "$area" "$pointer" "$desc" >> "$out"
+  ok "Added signal: $sid → ${out#"$ROOT_DIR/"}"
+}
+
+cmd_signal_normalise() {
+  # Minimal normaliser (non-AI): takes raw inbox notes and extracts bullet-ish lines.
+  # Intended to be replaced or augmented by an AI/agent later.
+  ensure_dirs
+  ensure_learning_templates
+
+  local app="linotype" area="core"
+  while [ $# -gt 0 ]; do
+    case "${1:-}" in
+      --app) app="${2:-linotype}"; shift 2 ;;
+      --area) area="${2:-core}"; shift 2 ;;
+      *) break ;;
+    esac
+  done
+
+  local out; out="$(learning_daily_signals_file "$app" "$area")"
+  mkdir -p "$(dirname "$out")"
+
+  if [ ! -f "$out" ]; then
+    cat > "$out" <<EOF
+# Signals (daily)
+
+Date: $(today_iso)
+App: ${app}
+Area: ${area}
+
+## Items
+
+EOF
+  fi
+
+  local d; d="$(today_iso)"
+  local f
+  local added=0
+  shopt -s nullglob
+  for f in "$LEARNING_INBOX_DIR"/*"$d"*.md "$LEARNING_INBOX_DIR"/*"$d"*.txt "$LEARNING_INBOX_DIR"/*"$d"*.markdown; do
+    [ -f "$f" ] || continue
+    # Take lines that look like bullets or short statements, ignore headers.
+    while IFS= read -r line; do
+      line="${line%$'\r'}"
+      # skip empty and markdown headings
+      [ -z "${line// /}" ] && continue
+      echo "$line" | grep -qE '^\s*#' && continue
+      if echo "$line" | grep -qE '^\s*[-*]\s+'; then
+        # strip bullet prefix
+        local text; text="$(echo "$line" | sed -E 's/^\s*[-*]\s+//')"
+        [ -z "${text// /}" ] && continue
+        local sid; sid="$(signal_next_id)"
+        printf -- "- %s [new] [inbox] [%s/%s] -> %s | %s\n" "$sid" "$app" "$area" "inbox:${f##*/}" "$text" >> "$out"
+        added=$((added + 1))
+      fi
+    done < "$f"
+  done
+  shopt -u nullglob
+
+  ok "Normalised inbox → signals: ${out#"$ROOT_DIR/"} (added: $added)"
+}
+
 main() {
   ensure_dirs
   local cmd="${1:-}"; shift || true
@@ -591,7 +848,9 @@ main() {
       local sub="${1:-}"; shift || true
       case "$sub" in
         ai) cmd_bundle_ai "$@" ;;
+        snapshot) cmd_bundle_snapshot "$@" ;;
         review) cmd_bundle_review "$@" ;;
+        project) cmd_bundle_project "$@" ;;
         *) fail "Unknown: bundle $sub"; usage; exit 1 ;;
       esac
       ;;
@@ -600,6 +859,14 @@ main() {
       case "$sub" in
         opencode) cmd_exec_opencode "$@" ;;
         *) fail "Unknown: exec $sub"; usage; exit 1 ;;
+      esac
+      ;;
+    signal)
+      local sub="${1:-}"; shift || true
+      case "$sub" in
+        add) cmd_signal_add "$@" ;;
+        normalise|normalize) cmd_signal_normalise "$@" ;;
+        *) fail "Unknown: signal $sub"; usage; exit 1 ;;
       esac
       ;;
     -h|--help|"") usage ;;

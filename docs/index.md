@@ -33,6 +33,7 @@ AI-assisted development is fast, but coherence is fragile. Without structure, do
 6. **[Roles](roles.html)** — Orchestrator, Executor, PDA, Module Architect
 7. **[Slug types](slug-types.html)** — Directional vs build
 8. **[v4](v4.html)** — Focus, optimise, parallel workflow
+9. **[v5](v5.html)** — Learning layer, signals, snapshots
 
 ## Reference
 
@@ -49,6 +50,7 @@ AI-assisted development is fast, but coherence is fragile. Without structure, do
 | [FAQ](faq.html) | Common questions |
 | [v3](v3.html) | v3 changes |
 | [v4](v4.html) | v4: focus, optimise, parallel, agent contract |
+| [v5](v5.html) | v5: learning layer, signals, snapshots |
 | [Templates](templates.html) | Starter slugs and usage |
 | [Changelog](changelog.html) | Version history |
 | [History](history.html) | How Linotype emerged; scale-of-contribution, PDA, slugs |

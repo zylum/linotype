@@ -29,6 +29,20 @@ In `docs/ai/_agent-rules.md`: **focus** = loose | standard | strict (scope disci
 
 Per slug: update slug file with what changed, checks run, decisions. Commit: `slug:<slug-name> done - <summary> #galley:<galley-name>`. When galley complete: move to `review/`, then commit `galley:<galley-name> ready for review - <summary>`.
 
+## Learning layer (v5)
+
+Capture signals and context across apps:
+
+```bash
+cli/linotype signal add "description" [--app <app>] [--area <area>]
+cli/linotype bundle snapshot [--app <app>] [--area <area>]
+```
+
+Files under `docs/learning/`:
+- `inbox/` — raw reflections (any format)
+- `signals/` — normalised signals: `YYYY-MM-DD__app__area__signals__daily.md`
+- `snapshots/` — compiled context for agents
+
 ## Parallel work and handoff
 
 One branch per galley; one worktree per active galley. One active Executor per galley; conflicts → record in galley `review.md`. Handoff: `cli/linotype exec opencode <galley>` generates executor brief from galley run-sheet and (if configured) launches executor.

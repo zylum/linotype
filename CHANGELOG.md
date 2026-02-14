@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.0
+- Added portable learning layer under `docs/learning/`
+  - `inbox/` for raw reflections
+  - `signals/` for normalised signals with S-### IDs
+  - `proposals/` for advisory clustering
+  - `snapshots/` for compiled agent context
+- New CLI commands: `signal add`, `signal normalise`, `bundle snapshot`
+- File naming convention: `YYYY-MM-DD__app__area__type__slug.md`
+- GitHub Actions templates (disabled by default) in `.github-disabled/workflows/`
+- Migration helper script `cli/migrate-v04-to-v05.sh` with dry-run mode
+- Updated agent rules with learning layer guidance
+- Added ChatGPT project instructions template
+
 ## v0.4.0 (Preview)
 - Introduced Galleys: PDA-owned planning artefacts for coordinating multi-module changes
 - Galleys enable parallel execution while preserving intent and traceability

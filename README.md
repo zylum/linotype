@@ -69,7 +69,23 @@ After bootstrapping, you'll have:
 - `docs/capabilities/` - Module specs and capability registry
 - `docs/work/` - Slug workflow (planning/doing/review/done)
 - `docs/templates/` - Templates for slugs and build notes
+- `docs/learning/` - Learning layer (v0.5): signals, reflections, snapshots
 - `linotype.sh` - Workflow automation script (wrapper for `cli/linotype.sh`)
+
+## Learning layer (v0.5)
+
+Capture signals and context across your product lifecycle:
+
+```bash
+./linotype.sh signal add "observation" --app myapp --area core
+./linotype.sh bundle snapshot --app myapp --area core
+```
+
+- `docs/learning/inbox/` - Raw reflections
+- `docs/learning/signals/` - Normalised signals (S-### IDs)
+- `docs/learning/snapshots/` - Compiled context for agents
+
+See [v0.5 changes](docs/v5.md) for migration guide.
 
 ## Documentation
 
@@ -83,6 +99,7 @@ After bootstrapping, you'll have:
 - [FAQ](docs/faq.md)
 - [v0.3 changes](docs/v3.md)
 - [v0.4 changes](docs/v4.md)
+- [v0.5 changes](docs/v5.md) — Learning layer, signals, snapshots
 
 ## License
 

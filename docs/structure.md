@@ -10,6 +10,18 @@ Product/domain snapshot (e.g. `docs/domain/index.md` or `docs/context/app-contex
 ### docs/work/
 Galley workflow stages: `planning/`, optional `queue/`, `doing/`, `review/`, `done/`. Each stage contains galley folders (e.g. `yyyymmdd-<name>/`). Inside a galley: `README.md`, optional `context.md`, `review.md`, and slugs (e.g. `slugs/*.md`). Move galleys with `cli/linotype galley move <galley-name> <stage>`.
 
+### docs/learning/ (v5)
+Learning layer for capturing signals, reflections, and context across the product lifecycle:
+- `inbox/` — raw reflections dropped by humans/systems (any format)
+- `signals/` — normalised signals with status tracking
+- `proposals/` — clustered suggestions (advisory)
+- `snapshots/` — compiled context for ChatGPT/agents
+- `_templates/` — templates for consistent structure
+
+File naming: `YYYY-MM-DD__app__area__type__slug.md`
+
+CLI: `cli/linotype signal add`, `cli/linotype bundle snapshot`
+
 ### docs/ai/
 Agent contract: `_agent-rules.md` (authoritative; focus, optimise, roles, scope). Repo root `AGENTS.md` adapts Linotype to the repo (min reading order, commands, conventions).
 
