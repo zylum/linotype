@@ -110,3 +110,19 @@ Constraints:
 - Execute slugs in order.
 - Stop only when blocked by ambiguity, failing checks, or a gated decision.
 - Record assumptions and open questions in the galley `review.md`.
+
+## LinoLoop (execution wrapper)
+LinoLoop is a thin wrapper that:
+- Generates the executor brief using `cli/linotype exec opencode <galley>`
+- Runs a loop runner (for example `ralph`) to iterate until completion or a configured stop limit
+
+Invocations:
+- `cli/linoloop <galley-name>`
+- `cli/linoloop <release-id>` (release references galleys; it does not contain them)
+
+Release format (minimal):
+- `docs/work/releases/<release-id>/galleys.txt` with one galley name per line.
+
+Agent expectations when run via LinoLoop:
+- Treat the current galley as the active scope.
+- Commit after each slug, update slug state and evidence, and maintain `review.md`.

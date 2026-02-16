@@ -100,6 +100,7 @@ See [v0.5 changes](docs/v5.md) for migration guide.
 - [v0.3 changes](docs/v3.md)
 - [v0.4 changes](docs/v4.md)
 - [v0.5 changes](docs/v5.md) — Learning layer, signals, snapshots
+- [v0.6 changes](docs/v6.md) — LinoLoop execution wrapper and releases
 
 ## License
 

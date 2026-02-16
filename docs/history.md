@@ -163,6 +163,16 @@ Added a **git-native learning layer** under `docs/learning/` for capturing signa
 
 See [v5](v5.html) for full details.
 
+### v0.6 – LinoLoop and Releases
+
+Added **LinoLoop** as a thin execution wrapper over executor briefs:
+
+- `cli/linoloop <galley>` to run one galley loop
+- `cli/linoloop <release-id>` to run an ordered release list from `docs/work/releases/<release-id>/galleys.txt`
+- Runner fallback: if no loop runner is installed, print the brief for manual use
+
+This keeps execution flow simple while preserving the existing galley/slug contract and agent rules.
+
 ---
 
 ## What Linotype Is (And Isn't)

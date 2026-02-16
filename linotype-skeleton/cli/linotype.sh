@@ -24,6 +24,7 @@ usage() {
 Linotype CLI
 
 Usage:
+  cli/linoloop <galley-name|release-id>   # run an execution loop (wrapper over linotype exec)
   cli/linotype init
   cli/linotype galley new <galley-name>
   cli/linotype galley move <galley-name> planning|queue|doing|review|done

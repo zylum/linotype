@@ -10,6 +10,10 @@ Product/domain snapshot (e.g. `docs/domain/index.md` or `docs/context/app-contex
 ### docs/work/
 Galley workflow stages: `planning/`, optional `queue/`, `doing/`, `review/`, `done/`. Each stage contains galley folders (e.g. `yyyymmdd-<name>/`). Inside a galley: `README.md`, optional `context.md`, `review.md`, and slugs (e.g. `slugs/*.md`). Move galleys with `cli/linotype galley move <galley-name> <stage>`.
 
+Optional release references:
+- `docs/work/releases/<release-id>/galleys.txt` (ordered galley IDs)
+- optional `run-sheet.md`, `status.md` for release-level coordination
+
 ### docs/learning/ (v5)
 Learning layer for capturing signals, reflections, and context across the product lifecycle:
 - `inbox/` — raw reflections dropped by humans/systems (any format)
@@ -43,6 +47,12 @@ Conventions that apply across modules.
 
 ### cli/linotype (or cli/linotype.sh)
 Galley-centric commands: `galley new`, `galley move <name> <stage>`, `galley list`, `galley auto`; optionally `slug new`. Stages: planning, (queue), doing, review, done. Use from repo root.
+
+### cli/linoloop
+Execution wrapper for executor briefs:
+- `cli/linoloop <galley-name>`
+- `cli/linoloop <release-id>` (reads `docs/work/releases/<release-id>/galleys.txt`)
+- runs a loop runner if available; otherwise prints brief for manual use
 
 ### Bootstrap
 Skeleton provides `cli/linotype-bootstrap.sh`, `docs/ai/_agent-rules.md`, and root `AGENTS.md` template. Copy or run bootstrap to create work dirs, templates, and agent rules.

@@ -2,7 +2,22 @@
 
 Summary of versions. Full history: [CHANGELOG.md](https://github.com/zylum/linotype/blob/main/CHANGELOG.md) in the repo root.
 
-## v4 (current)
+## v6 (current)
+
+- **LinoLoop wrapper** - New `cli/linoloop` command runs executor briefs in a loop runner (default `ralph`) with lock/log support.
+- **Release execution** - `cli/linoloop <release-id>` reads ordered galleys from `docs/work/releases/<release-id>/galleys.txt`.
+- **Manual fallback** - If no loop runner is installed, LinoLoop prints the executor brief for manual paste into OpenCode.
+
+See [v6](v6.html) for details.
+
+## v5
+
+- **Learning layer** - Added `docs/learning/` (inbox, signals, proposals, snapshots).
+- **Signals and snapshots** - Added lightweight helpers: `signal add`, `signal normalise`, `bundle snapshot`.
+
+See [v5](v5.html) for details.
+
+## v4
 
 - **Focus & optimise** — Repos set `focus` (loose / standard / strict) and optional `optimise` (speed / cost / quality) in `docs/ai/_agent-rules.md`.
 - **Parallel workflow** — Optional queue stage; one branch per galley; worktrees; one Executor per galley; conflict handling in `review.md`.

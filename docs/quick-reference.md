@@ -43,6 +43,20 @@ Files under `docs/learning/`:
 - `signals/` — normalised signals: `YYYY-MM-DD__app__area__signals__daily.md`
 - `snapshots/` — compiled context for agents
 
+## LinoLoop (v6)
+
+Run execution loops from generated executor briefs:
+
+```bash
+cli/linoloop <galley-name>
+cli/linoloop <release-id>
+```
+
+Release input file:
+- `docs/work/releases/<release-id>/galleys.txt` (one galley per line, `#` comments allowed)
+
+If no loop runner is installed, LinoLoop prints the executor brief so you can run manually.
+
 ## Parallel work and handoff
 
 One branch per galley; one worktree per active galley. One active Executor per galley; conflicts → record in galley `review.md`. Handoff: `cli/linotype exec opencode <galley>` generates executor brief from galley run-sheet and (if configured) launches executor.

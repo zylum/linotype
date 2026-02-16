@@ -25,4 +25,5 @@ Your first steps with Linotype.
 - [How to use](how-to-use.html) — Workflow and CLI  
 - [Quick reference](quick-reference.html) — Commands and structure  
 - [Galleys](galleys.html) — Lifecycle, queue, parallel work  
+- [v6](v6.html) — LinoLoop execution wrapper and release runs  
 - [FAQ](faq.html) — Common questions

@@ -30,6 +30,29 @@ cli/linotype galley auto
 
 Add slugs under the galley (e.g. `cli/linotype slug new <galley-name> <slug-name>` if your CLI supports it), then move the galley to `doing` when work starts, and to `review` when all slugs are complete.
 
+## LinoLoop execution wrapper (v6)
+
+LinoLoop wraps `cli/linotype exec opencode <galley>` and optionally runs a loop runner such as `ralph`.
+
+Run one galley:
+
+```bash
+cli/linoloop <galley-name>
+```
+
+Run a release (ordered galleys):
+
+```bash
+cli/linoloop <release-id>
+```
+
+Release format:
+- `docs/work/releases/<release-id>/galleys.txt`
+- one galley name per line
+- blank lines and `#` comments allowed
+
+If no configured runner exists, LinoLoop prints the executor brief and exits for manual execution.
+
 ## Small fixes
 
 For trivial changes (single file, low risk): implement directly and log in `docs/work/doing/small-fixes.md` (or equivalent). For traceability, create a slug inside a galley instead.
