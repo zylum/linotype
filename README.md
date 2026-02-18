@@ -51,6 +51,8 @@ This creates:
 ./linotype.sh galley move <galley-name> review      # Move to review
 ./linotype.sh galley move <galley-name> done        # Complete the galley
 ./linotype.sh galley list                          # List all galleys
+./linotype.sh exec brief <galley-name>             # Generate executor brief (tool-agnostic)
+./cli/linoloop <release-id> --mode serial-isolated # Run release with one worktree/branch per galley
 ```
 
 See [Quick Reference](docs/quick-reference.md) for more.
@@ -100,7 +102,7 @@ See [v0.5 changes](docs/v5.md) for migration guide.
 - [v0.3 changes](docs/v3.md)
 - [v0.4 changes](docs/v4.md)
 - [v0.5 changes](docs/v5.md) — Learning layer, signals, snapshots
-- [v0.6 changes](docs/v6.md) — LinoLoop execution wrapper and releases
+- [v0.6/v0.6.1 changes](docs/v6.md) — LinoLoop execution wrapper, releases, and worktree modes
 
 ## License
 

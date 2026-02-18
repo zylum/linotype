@@ -13,7 +13,10 @@ docs/work/releases/<release-id>/
 
 Running:
   cli/linoloop <release-id>
+  cli/linoloop <release-id> --mode serial-isolated
 
 Notes:
 - Galleys stay in their normal work locations (planning/queue/doing/review/done).
 - The release folder should not duplicate galley detail.
+- In `--mode auto`, releases default to `serial-isolated`.
+- `status.md` is append-updated by LinoLoop with timeline events during release runs.

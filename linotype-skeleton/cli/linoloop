@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# LinoLoop: thin orchestration layer over Linotype executor briefs.
-# - Target can be a single galley name OR a release id.
-# - Release format: docs/work/releases/<release-id>/galleys.txt (one galley per line)
-#
-# Loop runner:
-# - If `ralph` is available (open-ralph-wiggum), use it to run OpenCode repeatedly.
-# - Otherwise, print the brief and exit (manual paste into OpenCode).
+# LinoLoop: orchestration wrapper over Linotype executor briefs.
+# Targets:
+# - Single galley name
+# - Release id (docs/work/releases/<release-id>/galleys.txt)
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LINOTYPE=""
@@ -16,20 +13,44 @@ WORK_DIR="$DOCS_DIR/work"
 RELEASES_DIR="$WORK_DIR/releases"
 
 DIST_DIR="$ROOT_DIR/dist"
-LOCK_DIR="$DIST_DIR/linoloop/locks"
-LOG_DIR="$DIST_DIR/linoloop/logs"
+LINOLOOP_DIR="$DIST_DIR/linoloop"
+LOCK_DIR="$LINOLOOP_DIR/locks"
+LOG_DIR="$LINOLOOP_DIR/logs"
 
 AGENT="${LINOLOOP_AGENT:-opencode}"
 MAX_ITER="${LINOLOOP_MAX_ITER:-50}"
 RUNNER="${LINOLOOP_RUNNER:-ralph}"
+MODE="${LINOLOOP_MODE:-auto}"
+WORKTREE_ROOT="${LINOLOOP_WORKTREE_ROOT:-$LINOLOOP_DIR/worktrees}"
+
+REUSE_WORKTREE=0
+REQUIRE_CLEAN_GIT=1
+DRY_RUN=0
+AUTO_PR=0
 
 usage() {
   cat <<'USAGE'
 LinoLoop
 
 Usage:
-  cli/linoloop <galley-name>
-  cli/linoloop <release-id>
+  cli/linoloop <galley-name|release-id> [options]
+
+Options:
+  --mode <auto|direct|serial-isolated|parallel-isolated>
+      auto:
+        - single galley => direct
+        - release => serial-isolated
+      direct: run in current repository working tree
+      serial-isolated: one worktree/branch per galley, run in order
+      parallel-isolated: reserved; currently runs serial with warning
+
+  --worktree-root <path>   Root directory for worktrees
+  --reuse-worktree         Reuse existing worktree if present
+  --require-clean-git      Fail if root repo has uncommitted changes (default)
+  --allow-dirty            Allow dirty root repository
+  --auto-pr                Placeholder hook: record PR follow-up intent
+  --dry-run                Print plan without running runner
+  --help                   Show this help
 
 Release format:
   docs/work/releases/<release-id>/galleys.txt
@@ -38,13 +59,15 @@ Release format:
   - comment lines start with '#'
 
 Environment:
-  LINOLOOP_AGENT=opencode         # default: opencode
-  LINOLOOP_MAX_ITER=50            # default: 50
-  LINOLOOP_RUNNER=ralph           # default: ralph (open-ralph-wiggum)
+  LINOLOOP_AGENT=opencode
+  LINOLOOP_MAX_ITER=50
+  LINOLOOP_RUNNER=ralph
+  LINOLOOP_MODE=auto
+  LINOLOOP_WORKTREE_ROOT=dist/linoloop/worktrees
 
 Notes:
-  - If the runner is not available, LinoLoop will print the executor brief and exit.
-  - This script does not manage worktrees/branches yet; it expects your usual git discipline.
+  - If runner is unavailable, brief is printed and the command exits.
+  - In serial-isolated mode, branch name is: galley/<galley-name>.
 USAGE
 }
 
@@ -56,35 +79,51 @@ need() {
   command -v "$1" >/dev/null 2>&1 || return 1
 }
 
-resolve_linotype() {
-  if [ -x "$ROOT_DIR/cli/linotype" ]; then
-    LINOTYPE="$ROOT_DIR/cli/linotype"
+resolve_linotype_for_root() {
+  local root="$1"
+  if [ -x "$root/cli/linotype" ]; then
+    LINOTYPE="$root/cli/linotype"
     return 0
   fi
-  if [ -x "$ROOT_DIR/cli/linotype.sh" ]; then
-    LINOTYPE="$ROOT_DIR/cli/linotype.sh"
+  if [ -x "$root/cli/linotype.sh" ]; then
+    LINOTYPE="$root/cli/linotype.sh"
+    return 0
+  fi
+  if [ -x "$root/linotype-skeleton/cli/linotype.sh" ]; then
+    LINOTYPE="$root/linotype-skeleton/cli/linotype.sh"
     return 0
   fi
   return 1
 }
 
 ensure_dirs() {
-  mkdir -p "$LOCK_DIR" "$LOG_DIR"
+  mkdir -p "$LOCK_DIR" "$LOG_DIR" "$WORKTREE_ROOT"
+}
+
+safe_name() {
+  local raw="$1"
+  printf "%s" "$raw" | tr '/ ' '__'
+}
+
+timestamp_utc() {
+  date -u +"%Y-%m-%dT%H:%M:%SZ"
 }
 
 lock_acquire() {
-  local name="$1"
+  local name
+  name="$(safe_name "$1")"
   local lf="$LOCK_DIR/$name.lock"
   if [ -f "$lf" ]; then
     fail "Lock exists: $lf"
-    fail "Another run may be active or a previous run crashed. Delete the lock if safe."
+    fail "Another run may be active or a previous run crashed. Delete lock if safe."
     exit 1
   fi
   printf "%s\n" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" > "$lf"
 }
 
 lock_release() {
-  local name="$1"
+  local name
+  name="$(safe_name "$1")"
   rm -f "$LOCK_DIR/$name.lock" || true
 }
 
@@ -97,80 +136,288 @@ read_release_galleys() {
   local release="$1"
   local f="$RELEASES_DIR/$release/galleys.txt"
   awk '
-    BEGIN { }
     /^[[:space:]]*#/ { next }
     /^[[:space:]]*$/ { next }
     { gsub(/\r$/, ""); print $0 }
   ' "$f"
 }
 
-run_one_galley() {
-  local galley="$1"
-  local run_id="$2"
+release_status_file() {
+  local release="$1"
+  printf "%s/%s/status.md" "$RELEASES_DIR" "$release"
+}
 
-  if [ -z "$LINOTYPE" ]; then
-    fail "Linotype CLI not found. Tried:"
-    fail "  - $ROOT_DIR/cli/linotype"
-    fail "  - $ROOT_DIR/cli/linotype.sh"
+ensure_release_status_file() {
+  local release="$1"
+  local status_file
+  status_file="$(release_status_file "$release")"
+  mkdir -p "$(dirname "$status_file")"
+  if [ ! -f "$status_file" ]; then
+    cat > "$status_file" <<EOF
+# Release status: ${release}
+
+Generated by LinoLoop.
+
+## Timeline
+
+EOF
+  fi
+}
+
+append_release_status() {
+  local release="$1"
+  local message="$2"
+  local status_file
+  status_file="$(release_status_file "$release")"
+  ensure_release_status_file "$release"
+  printf -- "- %s | %s\n" "$(timestamp_utc)" "$message" >> "$status_file"
+}
+
+emit_auto_pr_placeholder() {
+  local release="$1"
+  local galley="$2"
+  local branch="$3"
+  warn "--auto-pr requested: placeholder only (no VCS provider integration yet)."
+  warn "Create PR manually for galley '$galley' on branch '$branch'."
+  append_release_status "$release" "auto-pr placeholder: create PR manually for ${galley} (branch ${branch})"
+}
+
+require_clean_git() {
+  local root="$1"
+  if [ "$REQUIRE_CLEAN_GIT" -ne 1 ]; then
+    return 0
+  fi
+  local dirty
+  dirty="$(git -C "$root" status --porcelain 2>/dev/null || true)"
+  if [ -n "$dirty" ]; then
+    fail "Repository is dirty: $root"
+    fail "Commit/stash changes or use --allow-dirty"
+    exit 1
+  fi
+}
+
+branch_for_galley() {
+  local galley="$1"
+  printf "galley/%s" "$galley"
+}
+
+worktree_path_for_galley() {
+  local galley="$1"
+  printf "%s/%s" "$WORKTREE_ROOT" "$galley"
+}
+
+ensure_worktree_for_galley() {
+  local galley="$1"
+  local branch
+  branch="$(branch_for_galley "$galley")"
+  local wt
+  wt="$(worktree_path_for_galley "$galley")"
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    ok "[dry-run] ensure worktree: $wt (branch: $branch)"
+    printf "%s" "$wt"
+    return 0
+  fi
+
+  require_clean_git "$ROOT_DIR"
+
+  if [ -d "$wt/.git" ] || [ -d "$wt" ]; then
+    if [ "$REUSE_WORKTREE" -eq 1 ]; then
+      ok "Reusing worktree: $wt"
+      printf "%s" "$wt"
+      return 0
+    fi
+    fail "Worktree path exists: $wt (use --reuse-worktree)"
     exit 1
   fi
 
-  # Generate executor brief (authoritative "what to do" prompt)
+  if git -C "$ROOT_DIR" show-ref --verify --quiet "refs/heads/$branch"; then
+    git -C "$ROOT_DIR" worktree add "$wt" "$branch" >/dev/null
+  else
+    git -C "$ROOT_DIR" worktree add -b "$branch" "$wt" HEAD >/dev/null
+  fi
+  ok "Created worktree: $wt (branch: $branch)"
+  printf "%s" "$wt"
+}
+
+effective_mode() {
+  local target_is_release="$1"
+  local mode="$MODE"
+  if [ "$mode" = "auto" ]; then
+    if [ "$target_is_release" = "1" ]; then
+      printf "serial-isolated"
+    else
+      printf "direct"
+    fi
+    return 0
+  fi
+  printf "%s" "$mode"
+}
+
+run_runner() {
+  local run_root="$1"
+  local galley="$2"
+  local run_id="$3"
+
+  if ! resolve_linotype_for_root "$run_root"; then
+    fail "Linotype CLI not found in: $run_root"
+    exit 1
+  fi
+
   local brief
   if ! brief="$("$LINOTYPE" exec "$AGENT" "$galley")"; then
     fail "Failed to generate executor brief for galley: $galley"
     exit 1
   fi
 
-  local log="$LOG_DIR/${run_id}__${galley}.log"
+  local safe_g
+  safe_g="$(safe_name "$galley")"
+  local brief_file="$LOG_DIR/${run_id}__${safe_g}.brief.md"
+  local log_file="$LOG_DIR/${run_id}__${safe_g}.log"
+  printf "%s\n" "$brief" > "$brief_file"
 
-  # If a loop runner exists (open-ralph-wiggum), use it.
+  if [ "$DRY_RUN" -eq 1 ]; then
+    ok "[dry-run] would run galley: $galley"
+    ok "[dry-run] run root: $run_root"
+    ok "[dry-run] brief: ${brief_file#"$ROOT_DIR/"}"
+    return 0
+  fi
+
   if need "$RUNNER"; then
     ok "Running $galley via $RUNNER (agent=$AGENT, max_iter=$MAX_ITER)"
-    # shellcheck disable=SC2086
-    "$RUNNER" "$brief" --agent "$AGENT" --max-iterations "$MAX_ITER" | tee "$log"
-    ok "Log: $log"
-  else
-    warn "Runner '$RUNNER' not found. Printing executor brief for manual use."
-    printf "%s\n" "$brief"
-    warn "Install open-ralph-wiggum (provides 'ralph') or set LINOLOOP_RUNNER to your loop runner."
-    exit 2
+    (
+      cd "$run_root"
+      "$RUNNER" "$brief" --agent "$AGENT" --max-iterations "$MAX_ITER"
+    ) | tee "$log_file"
+    ok "Log: ${log_file#"$ROOT_DIR/"}"
+    return 0
   fi
+
+  warn "Runner '$RUNNER' not found. Printing executor brief for manual use."
+  printf "%s\n" "$brief"
+  warn "Install a loop runner or set LINOLOOP_RUNNER."
+  exit 2
 }
 
-main() {
-  local target="${1:-}"
-  if [ -z "$target" ] || [ "$target" = "-h" ] || [ "$target" = "--help" ]; then
+run_one_galley() {
+  local galley="$1"
+  local mode="$2"
+  local run_id="$3"
+
+  case "$mode" in
+    direct)
+      require_clean_git "$ROOT_DIR"
+      run_runner "$ROOT_DIR" "$galley" "$run_id"
+      ;;
+    serial-isolated)
+      local wt
+      wt="$(ensure_worktree_for_galley "$galley")"
+      run_runner "$wt" "$galley" "$run_id"
+      ;;
+    parallel-isolated)
+      warn "parallel-isolated is not implemented yet; using serial-isolated"
+      local wt
+      wt="$(ensure_worktree_for_galley "$galley")"
+      run_runner "$wt" "$galley" "$run_id"
+      ;;
+    *)
+      fail "Unknown mode: $mode"
+      exit 1
+      ;;
+  esac
+}
+
+parse_args() {
+  TARGET="${1:-}"
+  if [ -z "$TARGET" ] || [ "$TARGET" = "-h" ] || [ "$TARGET" = "--help" ]; then
     usage
     exit 0
   fi
+  shift || true
 
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --mode)
+        MODE="${2:-auto}"
+        shift 2
+        ;;
+      --worktree-root)
+        WORKTREE_ROOT="${2:-$WORKTREE_ROOT}"
+        shift 2
+        ;;
+      --reuse-worktree)
+        REUSE_WORKTREE=1
+        shift
+        ;;
+      --require-clean-git)
+        REQUIRE_CLEAN_GIT=1
+        shift
+        ;;
+      --allow-dirty)
+        REQUIRE_CLEAN_GIT=0
+        shift
+        ;;
+      --auto-pr)
+        AUTO_PR=1
+        shift
+        ;;
+      --dry-run)
+        DRY_RUN=1
+        shift
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        fail "Unknown option: $1"
+        usage
+        exit 1
+        ;;
+    esac
+  done
+}
+
+main() {
+  parse_args "$@"
   ensure_dirs
-
-  if ! resolve_linotype; then
-    fail "Could not resolve linotype CLI executable"
-    exit 1
-  fi
 
   local run_id
   run_id="$(date +%Y%m%d-%H%M%S)"
 
-  lock_acquire "$target"
-  trap 'lock_release "$target"' EXIT
+  lock_acquire "$TARGET"
+  trap 'lock_release "$TARGET"' EXIT
 
-  if is_release "$target"; then
-    ok "Target is release: $target"
+  if is_release "$TARGET"; then
+    local mode
+    mode="$(effective_mode 1)"
+    ok "Target is release: $TARGET (mode: $mode)"
+    append_release_status "$TARGET" "release started (mode=${mode}, run_id=${run_id})"
     local g
     while IFS= read -r g; do
       ok "Release step: $g"
-      run_one_galley "$g" "$run_id"
-    done < <(read_release_galleys "$target")
-    ok "Release complete: $target"
-  else
-    ok "Target is galley: $target"
-    run_one_galley "$target" "$run_id"
-    ok "Galley complete (runner signalled completion): $target"
+      append_release_status "$TARGET" "galley started: ${g}"
+      if run_one_galley "$g" "$mode" "$run_id"; then
+        append_release_status "$TARGET" "galley completed: ${g}"
+        if [ "$AUTO_PR" -eq 1 ]; then
+          emit_auto_pr_placeholder "$TARGET" "$g" "$(branch_for_galley "$g")"
+        fi
+      else
+        append_release_status "$TARGET" "galley failed: ${g}"
+        fail "Release failed at galley: $g"
+        exit 1
+      fi
+    done < <(read_release_galleys "$TARGET")
+    append_release_status "$TARGET" "release completed (run_id=${run_id})"
+    ok "Release complete: $TARGET"
+    return 0
   fi
+
+  local mode
+  mode="$(effective_mode 0)"
+  ok "Target is galley: $TARGET (mode: $mode)"
+  run_one_galley "$TARGET" "$mode" "$run_id"
+  ok "Galley complete (runner signalled completion): $TARGET"
 }
 
 main "$@"

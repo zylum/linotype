@@ -2,7 +2,15 @@
 
 Summary of versions. Full history: [CHANGELOG.md](https://github.com/zylum/linotype/blob/main/CHANGELOG.md) in the repo root.
 
-## v6 (current)
+## v6.1 (current)
+
+- **Worktree-aware LinoLoop** - Added `--mode` options with isolated execution support (`serial-isolated`) and `auto` defaults.
+- **Safety controls** - Added `--require-clean-git` (default), `--allow-dirty`, `--reuse-worktree`, and `--dry-run`.
+- **Tool-agnostic brief command** - `cli/linotype exec brief <galley>` is now canonical; `exec opencode` remains an alias.
+
+See [v6](v6.html) for v6 baseline details.
+
+## v6
 
 - **LinoLoop wrapper** - New `cli/linoloop` command runs executor briefs in a loop runner (default `ralph`) with lock/log support.
 - **Release execution** - `cli/linoloop <release-id>` reads ordered galleys from `docs/work/releases/<release-id>/galleys.txt`.

@@ -34,7 +34,7 @@ AI-assisted development is fast, but coherence is fragile. Without structure, do
 7. **[Slug types](slug-types.html)** — Directional vs build
 8. **[v4](v4.html)** — Focus, optimise, parallel workflow
 9. **[v5](v5.html)** — Learning layer, signals, snapshots
-10. **[v6](v6.html)** — LinoLoop execution wrapper and release runs
+10. **[v6](v6.html)** — LinoLoop execution wrapper, release runs, and worktree modes
 
 ## Reference
 
@@ -52,7 +52,7 @@ AI-assisted development is fast, but coherence is fragile. Without structure, do
 | [v3](v3.html) | v3 changes |
 | [v4](v4.html) | v4: focus, optimise, parallel, agent contract |
 | [v5](v5.html) | v5: learning layer, signals, snapshots |
-| [v6](v6.html) | v6: LinoLoop, release execution lists |
+| [v6](v6.html) | v6/v6.1: LinoLoop, release execution lists, worktree isolation |
 | [Templates](templates.html) | Starter slugs and usage |
 | [Changelog](changelog.html) | Version history |
 | [History](history.html) | How Linotype emerged; scale-of-contribution, PDA, slugs |

@@ -50,6 +50,9 @@ Run execution loops from generated executor briefs:
 ```bash
 cli/linoloop <galley-name>
 cli/linoloop <release-id>
+cli/linoloop <release-id> --mode serial-isolated
+cli/linoloop <release-id> --auto-pr
+cli/linoloop <target> --dry-run
 ```
 
 Release input file:
@@ -57,6 +60,13 @@ Release input file:
 
 If no loop runner is installed, LinoLoop prints the executor brief so you can run manually.
 
+For releases, status timeline is appended to `docs/work/releases/<release-id>/status.md`.
+
+Modes:
+- `auto` (default): galley -> direct, release -> serial-isolated
+- `direct`: run in current working tree
+- `serial-isolated`: one worktree/branch per galley (`galley/<galley-name>`)
+
 ## Parallel work and handoff
 
-One branch per galley; one worktree per active galley. One active Executor per galley; conflicts → record in galley `review.md`. Handoff: `cli/linotype exec opencode <galley>` generates executor brief from galley run-sheet and (if configured) launches executor.
+One branch per galley; one worktree per active galley. One active Executor per galley; conflicts -> record in galley `review.md`. Handoff: `cli/linotype exec brief <galley>` generates executor brief from galley run-sheet and (if configured) launches executor.

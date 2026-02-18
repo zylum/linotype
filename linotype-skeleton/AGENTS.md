@@ -12,7 +12,9 @@ This repository uses Linotype.
 3. Active galley README, slugs, and `run-sheet.md` (if present)
 
 ## Execution handoff (UI-free)
-Preferred: `cli/linotype exec opencode <galley>`
+Preferred: `cli/linotype exec brief <galley>`
+
+Compatibility alias: `cli/linotype exec opencode <galley>`
 
 This generates an executor brief from the galley `run-sheet.md` and slugs, then launches the executor tool (or prints the brief to stdout if no launcher is configured).
 
