@@ -5,10 +5,19 @@ This document explains the folder structure and key artefacts.
 ## Core artefacts
 
 ### docs/domain/ or docs/context/
-Product/domain snapshot (e.g. `docs/domain/index.md` or `docs/context/app-context.md`). Agents use it for lookup; keep it minimal. Optional: capability registry and module specs under `docs/capabilities/` or equivalent.
+Product/domain snapshot (`docs/domain/index.md` ships by default). Treat it as the authoritative lookup for agents:
+- Link every module from the index (e.g. `docs/domain/auth.md`).
+- Split entries once they exceed ~40 lines; avoid monolith files.
+- Galley run sheets include a **Domain updates** section so every change records which module docs moved (or why nothing changed).
+You can add optional capability registries under `docs/capabilities/`.
 
 ### docs/work/
-Galley workflow stages: `planning/`, optional `queue/`, `doing/`, `review/`, `done/`. Each stage contains galley folders (e.g. `yyyymmdd-<name>/`). Inside a galley: `README.md`, optional `context.md`, `review.md`, and slugs (e.g. `slugs/*.md`). Move galleys with `cli/linotype galley move <galley-name> <stage>`.
+Galley workflow stages: `planning/`, optional `queue/`, `doing/`, `review/`, `done/`. Each stage contains galley folders (e.g. `yyyymmdd-<name>/`). Inside a galley: `README.md`, optional `context.md`, `review.md`, `run-sheet.md`, slugs (e.g. `slugs/*.md`), and the required **Domain updates** section inside the run sheet. Move galleys with `cli/linotype galley move <galley-name> <stage>`.
+
+Optional release references:
+- `docs/work/releases/<release-id>/galleys.txt` (ordered galley IDs)
+- optional `run-sheet.md`, `status.md` for release-level coordination
+- required `docs/work/releases/<version>.md` (one per version, movie-named release notes)
 
 ### docs/learning/ (v5)
 Learning layer for capturing signals, reflections, and context across the product lifecycle:
@@ -44,8 +53,18 @@ Conventions that apply across modules.
 ### cli/linotype (or cli/linotype.sh)
 Galley-centric commands: `galley new`, `galley move <name> <stage>`, `galley list`, `galley auto`; optionally `slug new`. Stages: planning, (queue), doing, review, done. Use from repo root.
 
+### cli/linoloop
+Execution wrapper for executor briefs:
+- `cli/linoloop <galley-name>`
+- `cli/linoloop <release-id>` (reads `docs/work/releases/<release-id>/galleys.txt`)
+- runs a loop runner if available; otherwise prints brief for manual use
+
 ### Bootstrap
 Skeleton provides `cli/linotype-bootstrap.sh`, `docs/ai/_agent-rules.md`, and root `AGENTS.md` template. Copy or run bootstrap to create work dirs, templates, and agent rules.
+
+Release scaffolding:
+- `cli/linotype release init <version> <movie>` generates `docs/work/releases/<version>.md`, blocking duplicate movie names (v0.6 = “Casablanca”).
+- `cli/linotype release note <version> "<summary>"` appends bullets under Highlights.
 
 ## Principles
 

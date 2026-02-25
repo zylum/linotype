@@ -21,6 +21,13 @@ Optional: use a **queue** stage for handoff—move to `queue/` when ready; only 
 
 Galleys under `docs/work/{planning,queue,doing,review,done}/`; slugs inside each galley. Domain index: `docs/domain/index.md`. Agent rules: `docs/ai/_agent-rules.md`; repo adapter: `AGENTS.md`.
 
+## Release notes & movie names
+
+- `cli/linotype release init <version> <movie>` scaffolds `docs/work/releases/<version>.md` and ensures the movie codename hasn’t been used before (v0.6 = “Casablanca”).
+- `cli/linotype release note <version> "<summary>"` appends a bullet under the Highlights section.
+- Keep a single changelog (`CHANGELOG.md`) and link to the per-version release file for detail.
+- Each repo maintains **one** `docs/work/releases/<version>.md` per release, even if it contains multiple apps.
+
 ## Focus and optimise
 
 In `docs/ai/_agent-rules.md`: **focus** = loose | standard | strict (scope discipline). **optimise** = speed | cost | quality (optional; trade-off bias). Defaults: focus per repo; optimise balanced.
@@ -28,6 +35,12 @@ In `docs/ai/_agent-rules.md`: **focus** = loose | standard | strict (scope disci
 ## Proof and commits
 
 Per slug: update slug file with what changed, checks run, decisions. Commit: `slug:<slug-name> done - <summary> #galley:<galley-name>`. When galley complete: move to `review/`, then commit `galley:<galley-name> ready for review - <summary>`.
+
+## Domain discipline
+
+- `docs/domain/index.md` is mandatory reading before prompts; split large modules into `docs/domain/<module>.md` files and list them from the index.
+- Every galley run sheet includes a **Domain updates** section; fill it every time (or explicitly mark “N/A” with rationale).
+- `cli/check-domain.sh` and CI fail when the domain index is missing or when run sheets omit the section.
 
 ## Learning layer (v5)
 
@@ -43,6 +56,30 @@ Files under `docs/learning/`:
 - `signals/` — normalised signals: `YYYY-MM-DD__app__area__signals__daily.md`
 - `snapshots/` — compiled context for agents
 
+## LinoLoop (v6)
+
+Run execution loops from generated executor briefs:
+
+```bash
+cli/linoloop <galley-name>
+cli/linoloop <release-id>
+cli/linoloop <release-id> --mode serial-isolated
+cli/linoloop <release-id> --auto-pr
+cli/linoloop <target> --dry-run
+```
+
+Release input file:
+- `docs/work/releases/<release-id>/galleys.txt` (one galley per line, `#` comments allowed)
+
+If no loop runner is installed, LinoLoop prints the executor brief so you can run manually.
+
+For releases, status timeline is appended to `docs/work/releases/<release-id>/status.md`.
+
+Modes:
+- `auto` (default): galley -> direct, release -> serial-isolated
+- `direct`: run in current working tree
+- `serial-isolated`: one worktree/branch per galley (`galley/<galley-name>`)
+
 ## Parallel work and handoff
 
-One branch per galley; one worktree per active galley. One active Executor per galley; conflicts → record in galley `review.md`. Handoff: `cli/linotype exec opencode <galley>` generates executor brief from galley run-sheet and (if configured) launches executor.
+One branch per galley; one worktree per active galley. One active Executor per galley; conflicts -> record in galley `review.md`. Handoff: `cli/linotype exec brief <galley>` generates executor brief from galley run-sheet and (if configured) launches executor.

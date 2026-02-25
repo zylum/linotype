@@ -2,7 +2,30 @@
 
 Summary of versions. Full history: [CHANGELOG.md](https://github.com/zylum/linotype/blob/main/CHANGELOG.md) in the repo root.
 
-## v4 (current)
+## v6.1 (current)
+
+- **Worktree-aware LinoLoop** - Added `--mode` options with isolated execution support (`serial-isolated`) and `auto` defaults.
+- **Safety controls** - Added `--require-clean-git` (default), `--allow-dirty`, `--reuse-worktree`, and `--dry-run`.
+- **Tool-agnostic brief command** - `cli/linotype exec brief <galley>` is now canonical; `exec opencode` remains an alias.
+
+See [v6](v6.html) for v6 baseline details.
+
+## v6
+
+- **LinoLoop wrapper** - New `cli/linoloop` command runs executor briefs in a loop runner (default `ralph`) with lock/log support.
+- **Release execution** - `cli/linoloop <release-id>` reads ordered galleys from `docs/work/releases/<release-id>/galleys.txt`.
+- **Manual fallback** - If no loop runner is installed, LinoLoop prints the executor brief for manual paste into OpenCode.
+
+See [v6](v6.html) for details.
+
+## v5
+
+- **Learning layer** - Added `docs/learning/` (inbox, signals, proposals, snapshots).
+- **Signals and snapshots** - Added lightweight helpers: `signal add`, `signal normalise`, `bundle snapshot`.
+
+See [v5](v5.html) for details.
+
+## v4
 
 - **Focus & optimise** — Repos set `focus` (loose / standard / strict) and optional `optimise` (speed / cost / quality) in `docs/ai/_agent-rules.md`.
 - **Parallel workflow** — Optional queue stage; one branch per galley; worktrees; one Executor per galley; conflict handling in `review.md`.

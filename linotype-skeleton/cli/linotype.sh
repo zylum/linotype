@@ -24,13 +24,15 @@ usage() {
 Linotype CLI
 
 Usage:
+  cli/linoloop <galley-name|release-id>   # run an execution loop (wrapper over linotype exec)
   cli/linotype init
   cli/linotype galley new <galley-name>
   cli/linotype galley move <galley-name> planning|queue|doing|review|done
   cli/linotype galley list
   cli/linotype galley auto
   cli/linotype slug new <galley-name> <slug-name>
-  cli/linotype exec opencode <galley-name> [--copy]
+  cli/linotype exec brief <galley-name> [--copy]
+  cli/linotype exec opencode <galley-name> [--copy]  # compatibility alias
   cli/linotype bundle ai <galley-name>
   cli/linotype bundle project
   cli/linotype bundle review [--since 30d|7d|YYYY-WW|all] [--weekly]
@@ -194,7 +196,7 @@ cmd_exec_opencode() {
   local galley_raw="${1:-}"
   shift || true
   if [ -z "$galley_raw" ]; then
-    fail "Usage: cli/linotype exec opencode <galley-name> [--copy]"
+    fail "Usage: cli/linotype exec brief <galley-name> [--copy]"
     exit 1
   fi
 
@@ -857,7 +859,7 @@ main() {
     exec)
       local sub="${1:-}"; shift || true
       case "$sub" in
-        opencode) cmd_exec_opencode "$@" ;;
+        brief|opencode) cmd_exec_opencode "$@" ;;
         *) fail "Unknown: exec $sub"; usage; exit 1 ;;
       esac
       ;;

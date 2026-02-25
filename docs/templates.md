@@ -22,6 +22,12 @@ Create a galley with one or more slugs that deliver the smallest end-to-end slic
 
 Use `cli/linotype slug new <galley-name> <slug-name>` when your CLI supports it. Slug names: kebab-case (e.g. `auth-backend`, `ui-login`). Each slug file lives inside the galley (e.g. `slugs/<slug-name>.md`).
 
+## Domain updates block
+
+- Every galley run sheet contains a **Domain updates** section.
+- When a slug changes behaviour or a module contract, link the relevant `docs/domain/<module>.md` entries and summarise the delta.
+- If nothing changed, explicitly state “No doc update (reason)” so reviewers can confirm.
+
 ## More
 
 - [Galleys](galleys.html) — README structure, lifecycle, parallel workflow  

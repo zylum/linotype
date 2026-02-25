@@ -30,6 +30,71 @@ cli/linotype galley auto
 
 Add slugs under the galley (e.g. `cli/linotype slug new <galley-name> <slug-name>` if your CLI supports it), then move the galley to `doing` when work starts, and to `review` when all slugs are complete.
 
+## Release notes & movie naming
+
+- One release file per version: `docs/work/releases/<version>.md`.
+- Run `cli/linotype release init <version> <movie>` to scaffold the file and reserve the movie codename (v0.6 = “Casablanca”).
+- Append bullets with `cli/linotype release note <version> "<summary>"` as you wrap galleys.
+- Reference the release file from the root `CHANGELOG.md` so you keep a single canonical log.
+
+## LinoLoop execution wrapper (v6.1)
+
+LinoLoop wraps `cli/linotype exec opencode <galley>` and optionally runs a loop runner such as `ralph`.
+
+Run one galley:
+
+```bash
+cli/linoloop <galley-name>
+```
+
+Run one galley in isolated worktree:
+
+```bash
+cli/linoloop <galley-name> --mode serial-isolated
+```
+
+Run a release (ordered galleys):
+
+```bash
+cli/linoloop <release-id>
+```
+
+In `--mode auto`, release runs default to `serial-isolated`.
+
+Useful options:
+
+```bash
+cli/linoloop <target> --worktree-root ../.linotype-worktrees --reuse-worktree
+cli/linoloop <target> --dry-run
+cli/linoloop <release-id> --auto-pr
+```
+
+Release format:
+- `docs/work/releases/<release-id>/galleys.txt`
+- one galley name per line
+- blank lines and `#` comments allowed
+
+If no configured runner exists, LinoLoop prints the executor brief and exits for manual execution.
+
+For release targets, LinoLoop appends timeline entries to:
+- `docs/work/releases/<release-id>/status.md`
+
+`--auto-pr` in v0.6.1 is a placeholder that records manual PR follow-up notes in that status file.
+
+## Executor brief command
+
+Canonical (tool-agnostic):
+
+```bash
+cli/linotype exec brief <galley-name>
+```
+
+Compatibility alias:
+
+```bash
+cli/linotype exec opencode <galley-name>
+```
+
 ## Small fixes
 
 For trivial changes (single file, low risk): implement directly and log in `docs/work/doing/small-fixes.md` (or equivalent). For traceability, create a slug inside a galley instead.
@@ -37,6 +102,12 @@ For trivial changes (single file, low risk): implement directly and log in `docs
 ## Proof and commits
 
 Per slug: record what changed, checks run, and decisions in the slug file. Commit: `slug:<slug-name> done - <summary> #galley:<galley-name>`. When the galley is complete: move to `review/`, then commit `galley:<galley-name> ready for review - <summary>`.
+
+## Domain documentation discipline
+
+- `docs/domain/index.md` ships by default; agents must skim it (and the linked module files) before prompting.
+- When a change touches a module, update the corresponding `docs/domain/<module>.md` entry and record the change inside the galley’s **Domain updates** section.
+- If no docs change is needed, explicitly mark “No doc update” with reasoning so reviewers can confirm.
 
 ## Agent rules and repo adapter
 
