@@ -12,6 +12,14 @@ Treat them as non-negotiable constraints unless the user explicitly overrides th
 ## Primary objective
 Deliver requested change safely and minimally, within the active galley scope, while keeping documentation aligned with behaviour.
 
+## Execution phases (behavioural / structural slugs)
+For any slug that changes behaviour, contracts, or introduces multi-file structure:
+1. **Phase A – Contract freeze**: lock the API/tool names, schemas, error model, user journeys, and worked examples inside the slug + galley docs.
+2. **Phase B – Implementation**: execute only against the frozen contract. No schema/contract changes are allowed in this phase.
+3. **Phase C – Verify**: run checks/tests, capture outputs, and record evidence in the slug and galley review.
+
+If Phase B reveals missing requirements, return to Phase A, update the slug/galley docs, and only then continue. Do not “discover” scope mid-build without revisiting the contract.
+
 ## Learning layer (v0.5)
 Linotype supports a portable learning layer under:
 - `docs/learning/inbox/` raw reflections (human/system drops)
@@ -27,9 +35,11 @@ Signals discipline:
 - Create signals as small, independent bullets (avoid Jira-style hierarchies).
 - Prefer evidence pointers (commit hash, galley/slug reference) when marking done.
 
-**Domain memory:** Consult `docs/domain/index.md` before prompting with large context, open-ended code, or external tools (web search, long docs). Look up concepts here first to cut token bloat and improve grounding.
+**Domain memory:** Consult `docs/domain/index.md` (and linked module files) before prompting with large context, open-ended code, or external tools. Look up concepts here first to cut token bloat.
 
-Before asking or generating code, check `docs/domain/index.md` for relevant definitions or patterns.
+Snapshot discipline:
+- Generate targeted snapshots with `cli/linotype bundle snapshot --app <app> --area <area> --domains` (if available) so prompts stay lean.
+- If the domain docs lack the needed detail, update them inside the active galley before escalating.
 
 ## Minimum reading order
 Before starting work, an agent must read:
@@ -37,6 +47,15 @@ Before starting work, an agent must read:
 2. `docs/domain/index.md` (lookup only, minimise token bloat)
 3. The active galley README and its slugs (and `run-sheet.md` if present)
 4. If present and relevant: latest `docs/learning/snapshots/*snapshot*` for the target app/area
+
+## Slug context pack (preferred for agent execution)
+When running via OpenCode/Cursor (or any agent runner), generate a fresh context pack per slug:
+- slug purpose, acceptance criteria, and autonomy
+- explicitly allowed files/paths
+- galley-level constraints (branch, stop conditions, domain updates)
+- links to the relevant `docs/domain/*.md` entries instead of copying entire files
+
+Keep the pack minimal; this keeps prompts lean and reduces drift.
 
 Everything else is reference unless the active galley asks for it.
 
@@ -48,21 +67,32 @@ Everything else is reference unless the active galley asks for it.
 
 ## Autonomy and stop conditions
 - Prefer continuous execution: run all slugs to completion unless blocked.
+- Treat a galley handoff as a contract: finish every slug and move the galley to the requested stage before checking back unless a gated decision stops you.
 - Stop and ask only when:
   - You are blocked by ambiguity that changes behaviour.
   - Acceptance checks fail and cannot be fixed safely.
   - A decision marked "gated" is reached.
+  - Implementation would require changing a frozen contract/schema, adding new endpoints, or expanding the declared scope.
 - If not blocked: make the safest minimal assumption and record an open question in `review.md` or the slug.
 
 ## Handoff and commits
 - One branch per galley; prefer a dedicated worktree.
 - Commit after each slug with the format: `slug:<slug-name> done - <summary> #galley:<galley-name>`
+  - Optional suffix: `#phase:contract|build|verify` to show where the slug finished.
 - When the galley is complete, move it to `review/` and commit: `galley:<galley-name> ready for review - <summary>`
 
 ## Code and doc alignment
 - Update slugs with what changed, checks run, and decisions made.
-- If behaviour changes, update the relevant capability description or glossary entry.
+- No slug may be marked **done** without:
+  - commands/tests run
+  - evidence pointers (file paths, outputs, or commit hashes) captured in the slug and galley review
+- If behaviour changes, update the relevant capability description, glossary entry, and `docs/domain/<module>.md` file.
 - Prefer links over duplication: reference files rather than copying long passages.
+
+## Release notes & movie naming
+- Each major release uses an unused iconic movie codename (v0.6 = “Casablanca”). If one is already claimed in `CHANGELOG.md`, pick a different movie.
+- Record user-facing changes in `docs/work/releases/<version>.md` (single file per version). Use `cli/linotype release init` / `release note` helpers when available.
+- Galley run sheets include a **Domain updates** block; update it and mention any release-note bullets generated by that galley.
 
 ## Meta-rules
 - Do not add speculative future work to the active galley; record it in the galley `review.md` or `docs/learning/signals/` for later triage.

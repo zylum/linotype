@@ -21,6 +21,13 @@ Optional: use a **queue** stage for handoff—move to `queue/` when ready; only 
 
 Galleys under `docs/work/{planning,queue,doing,review,done}/`; slugs inside each galley. Domain index: `docs/domain/index.md`. Agent rules: `docs/ai/_agent-rules.md`; repo adapter: `AGENTS.md`.
 
+## Release notes & movie names
+
+- `cli/linotype release init <version> <movie>` scaffolds `docs/work/releases/<version>.md` and ensures the movie codename hasn’t been used before (v0.6 = “Casablanca”).
+- `cli/linotype release note <version> "<summary>"` appends a bullet under the Highlights section.
+- Keep a single changelog (`CHANGELOG.md`) and link to the per-version release file for detail.
+- Each repo maintains **one** `docs/work/releases/<version>.md` per release, even if it contains multiple apps.
+
 ## Focus and optimise
 
 In `docs/ai/_agent-rules.md`: **focus** = loose | standard | strict (scope discipline). **optimise** = speed | cost | quality (optional; trade-off bias). Defaults: focus per repo; optimise balanced.
@@ -28,6 +35,12 @@ In `docs/ai/_agent-rules.md`: **focus** = loose | standard | strict (scope disci
 ## Proof and commits
 
 Per slug: update slug file with what changed, checks run, decisions. Commit: `slug:<slug-name> done - <summary> #galley:<galley-name>`. When galley complete: move to `review/`, then commit `galley:<galley-name> ready for review - <summary>`.
+
+## Domain discipline
+
+- `docs/domain/index.md` is mandatory reading before prompts; split large modules into `docs/domain/<module>.md` files and list them from the index.
+- Every galley run sheet includes a **Domain updates** section; fill it every time (or explicitly mark “N/A” with rationale).
+- `cli/check-domain.sh` and CI fail when the domain index is missing or when run sheets omit the section.
 
 ## Learning layer (v5)
 

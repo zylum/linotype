@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.6.3 (Casablanca)
+- Added execution-phase discipline (Contract → Build → Verify) plus slug context-pack guidance to `docs/ai/_agent-rules.md` and the bootstrap skeleton
+- Enforced evidence logging for every slug marked done; optional `#phase:<step>` commit suffix for clearer review trails
+- Modularised `cli/linotype` into `cli/lib/linotype/` subcommands with new `release` helpers for per-version notes
+- Introduced `docs/domain/index.md` scaffold and updated all guides (README, quick reference, structure, how-to) with release-note + domain requirements
+- Bumped release metadata to `0.6.3` and added `docs/work/releases/0.6.3.md`
+
+## v0.6.2 (Casablanca)
+- Added single-file release notes per version (`docs/work/releases/<version>.md`) plus movie codename enforcement via `cli/linotype release ...`
+- Introduced `docs/domain/index.md`, galley “Domain updates” sections, and CI lint to keep domain docs fresh
+- Refactored `cli/linotype` into modular Bash files with new `release` subcommands and bats test coverage
+- Restored GitHub Actions (shellcheck, bats, domain lint) so CLI and docs stay verified on every push
+
+See `docs/work/releases/0.6.2.md` for the user-facing highlights.
+
 ## v0.6.1
 - Added worktree-aware LinoLoop execution modes:
   - `--mode direct` (run in current working tree)

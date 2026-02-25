@@ -57,6 +57,18 @@ This creates:
 
 See [Quick Reference](docs/quick-reference.md) for more.
 
+## Release names & notes
+
+- Every major Linotype release uses an unused iconic movie codename. **v0.6 = “Casablanca”**; future versions must lock a new film before announcing.
+- Bootstrapped projects capture user-facing release notes in `docs/work/releases/<version>.md` (one file per version, no per-app forks) and cross-link to the root [CHANGELOG](CHANGELOG.md).
+- `cli/linotype release init <version> <movie>` scaffolds the file and blocks duplicate movie names; `cli/linotype release note <version> "<summary>"` appends highlights.
+
+## Domain discipline
+
+- `docs/domain/index.md` now ships with Linotype; agents must skim it before prompting.
+- Split large modules into `docs/domain/<module>.md` files and list them under the index.
+- Every galley run sheet includes a “Domain updates” section; update it whenever docs change or explicitly record “no doc change” with reasoning.
+
 ### Or explore this repo
 
 ```bash

@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="$SCRIPT_DIR/lib/linotype"
+
+source "$LIB_DIR/common.sh"
+source "$LIB_DIR/galley.sh"
+source "$LIB_DIR/bundle.sh"
+source "$LIB_DIR/exec.sh"
+source "$LIB_DIR/learning.sh"
+source "$LIB_DIR/release.sh"
+
+linotype_main() {
+  ensure_dirs
+  local cmd="${1:-}"
+  shift || true
+  case "$cmd" in
+    init) cmd_init "$@" ;;
+    galley)
+      local sub="${1:-}"; shift || true
+      case "$sub" in
+        new) cmd_galley_new "$@" ;;
+        move) cmd_galley_move "$@" ;;
+        list) cmd_galley_list "$@" ;;
+        auto) cmd_galley_auto "$@" ;;
+        *) fail "Unknown: galley $sub"; usage; exit 1 ;;
+      esac
+      ;;
+    slug)
+      local sub="${1:-}"; shift || true
+      case "$sub" in
+        new) cmd_slug_new "$@" ;;
+        *) fail "Unknown: slug $sub"; usage; exit 1 ;;
+      esac
+      ;;
+    bundle)
+      local sub="${1:-}"; shift || true
+      case "$sub" in
+        ai) cmd_bundle_ai "$@" ;;
+        snapshot) cmd_bundle_snapshot "$@" ;;
+        review) cmd_bundle_review "$@" ;;
+        project) cmd_bundle_project "$@" ;;
+        *) fail "Unknown: bundle $sub"; usage; exit 1 ;;
+      esac
+      ;;
+    exec)
+      local sub="${1:-}"; shift || true
+      case "$sub" in
+        brief|opencode) cmd_exec_opencode "$@" ;;
+        *) fail "Unknown: exec $sub"; usage; exit 1 ;;
+      esac
+      ;;
+    signal)
+      local sub="${1:-}"; shift || true
+      case "$sub" in
+        add) cmd_signal_add "$@" ;;
+        normalise|normalize) cmd_signal_normalise "$@" ;;
+        *) fail "Unknown: signal $sub"; usage; exit 1 ;;
+      esac
+      ;;
+    release)
+      local sub="${1:-}"; shift || true
+      case "$sub" in
+        init) cmd_release_init "$@" ;;
+        note) cmd_release_note "$@" ;;
+        *) fail "Unknown: release $sub"; usage; exit 1 ;;
+      esac
+      ;;
+    -h|--help|"" ) usage ;;
+    *) fail "Unknown command: $cmd"; usage; exit 1 ;;
+  esac
+}
+
+linotype_main "$@"
