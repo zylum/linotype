@@ -57,6 +57,13 @@ When running via OpenCode/Cursor (or any agent runner), generate a fresh context
 
 Keep the pack minimal; this keeps prompts lean and reduces drift.
 
+## Subagent execution (parallel by domain)
+When running subagents via `cli/linotype exec brief <galley> --by-domain`:
+- Each subagent receives only its domain's slugs and allowed paths.
+- **Path scoping**: Work only within the paths listed in the brief. Do not expand scope mid-execution.
+- **Cross-domain changes**: If a slug needs to touch 2+ domains, run it in the parent or split into domain-specific slugs.
+- Each subagent must tick the Domain updates section for the files it changed.
+
 Everything else is reference unless the active galley asks for it.
 
 ## Scope and safety

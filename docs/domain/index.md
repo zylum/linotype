@@ -26,5 +26,12 @@ Linotype treats this file as the first stop for any agent prompt. Keep it short,
 1. Create module files under `docs/domain/` (copy headings from this file).
 2. Update each galley’s “Domain updates” section when the docs change.
 3. Keep this index tight—link out rather than duplicating prose.
+4. Run weekly reconcile (see `docs/learning/_templates/reconcile-weekly.md`) including the Domain structure check.
+
+## Pragmatic rules
+
+- **Empty domain**: Merge into parent or mark "reserved" with reason within 2 weeks.
+- **Core >3 modules**: Consider splitting when the next galley touches it.
+- **New domain**: Only add if 2+ slugs will touch it this quarter.
 
 _Placeholder_: update this file with real modules the moment you bootstrap a project.

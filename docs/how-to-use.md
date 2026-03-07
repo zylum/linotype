@@ -103,6 +103,10 @@ For trivial changes (single file, low risk): implement directly and log in `docs
 
 Per slug: record what changed, checks run, and decisions in the slug file. Commit: `slug:<slug-name> done - <summary> #galley:<galley-name>`. When the galley is complete: move to `review/`, then commit `galley:<galley-name> ready for review - <summary>`.
 
+## Weekly reconcile
+
+Run the weekly reconcile template (`docs/learning/_templates/reconcile-weekly.md`) including the **Domain structure** section. Cadence: end of sprint or Friday. This keeps domain docs pragmatic (no empty domains, core not overloaded).
+
 ## Domain documentation discipline
 
 - `docs/domain/index.md` ships by default; agents must skim it (and the linked module files) before prompting.

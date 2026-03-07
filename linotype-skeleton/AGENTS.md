@@ -2,6 +2,8 @@
 
 This repository uses Linotype.
 
+- **Linotype** ships galleys, slugs, and workflow structure. It is the base framework.
+- **Consuming apps** may add custom build rules (e.g. BT-*, `build-tasks/`, capabilities). Those live in the app repo or `.cursor/rules/`, not in Linotype. See `docs/ai/_customization-hook.md`.
 - Authoritative operating contract: `docs/ai/_agent-rules.md`
 - This file adapts Linotype to this specific repo (commands, checks, conventions).
 - If this file conflicts with `_agent-rules.md`, `_agent-rules.md` wins.

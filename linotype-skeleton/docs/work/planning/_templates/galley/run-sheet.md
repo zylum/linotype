@@ -12,12 +12,19 @@ Base: <branch or main>
   - a decision marked as gated is reached
 
 ## Order of work (slugs)
-1. <slug-id> - <purpose> (autonomy: continuous | checkpoint | gated)
+
+Add `domain:` so slugs can be grouped for parallel subagent execution (see `exec brief --by-domain`).
+
+1. <slug-id> - <purpose> (domain: <module>, autonomy: continuous | checkpoint | gated)
    - Touch: <key files>
    - Acceptance checks: <commands or checks>
    - Stop conditions (if any): <one line>
 
-2. <slug-id> - <purpose> (...)
+2. <slug-id> - <purpose> (domain: <module>, ...)
+
+## Domain updates
+
+- [ ] <module>.md (or: N/A - no behaviour change)
 
 ## Constraints
 - Allowed paths: <list>
