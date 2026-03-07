@@ -80,6 +80,69 @@ After review:
 
 The galley moves to `docs/work/done/`.
 
+## Customizing for your app
+
+Linotype ships galleys and slugs. Consuming apps often add their own build rules:
+
+- **BT-*** build tasks, `build-tasks/planning|doing|done`, PLAN + BUILD-NOTES
+- **Capabilities**, component library, mock data conventions
+
+After bootstrap, add your rules to `.cursor/rules/` or `docs/ai/`. See `docs/ai/_customization-hook.md` for mapping BT-* to galleys.
+
+## Example flows
+
+### Flow A: Simple build (single galley, in-place)
+
+For small changes or a single vertical slice:
+
+```bash
+./linotype.sh galley new 20260307-login-tweak
+# Edit README, run-sheet, add slugs under slugs/
+./linotype.sh galley move 20260307-login-tweak doing
+# Do the work in current repo, commit per slug
+./linotype.sh galley move 20260307-login-tweak review
+```
+
+No worktree. One branch. One executor.
+
+---
+
+### Flow B: Worktree build (major feature, isolated branch)
+
+For larger features where you want a dedicated branch and working tree:
+
+```bash
+./linotype.sh galley new 20260307-auth-passkeys
+# Edit README, run-sheet, add slugs
+./linotype.sh galley move 20260307-auth-passkeys queue
+
+# Run via LinoLoop with worktree isolation
+cli/linoloop 20260307-auth-passkeys --mode serial-isolated
+```
+
+LinoLoop creates a worktree at `dist/linoloop/worktrees/`, checks out `galley/20260307-auth-passkeys`, runs the executor brief. When done, merge the worktree branch.
+
+---
+
+### Flow C: Worktree + subagent build (parallel by domain)
+
+For galleys that span multiple domains (e.g. auth + payments), run subagents in parallel—one per domain:
+
+```bash
+./linotype.sh galley new 20260307-auth-payments
+# Add slugs with domain: in run-sheet (e.g. domain: auth, domain: payments)
+./linotype.sh galley move 20260307-auth-payments queue
+
+# Generate per-domain briefs for subagent handoff
+cli/linotype exec brief 20260307-auth-payments --by-domain
+```
+
+Then spawn one subagent per domain brief (e.g. via Cursor mcp_task or OpenCode). Each subagent gets only its domain's slugs and allowed paths. Parent reconciles when all complete.
+
+See [Parallel workflow](docs/parallel-workflow.md) for details.
+
+---
+
 ## What's next?
 
 - Create more galleys: `./linotype.sh galley new <galley-name>`
@@ -91,6 +154,7 @@ The galley moves to `docs/work/done/`.
 
 - [Quick Reference](docs/quick-reference.md) - Command cheat sheet
 - [How to use](docs/how-to-use.md) - Detailed workflow guide
+- [Parallel workflow](docs/parallel-workflow.md) - Worktrees and subagents
 - [FAQ](docs/faq.md) - Common questions
 - [Structure](docs/structure.md) - Understanding the folders
 

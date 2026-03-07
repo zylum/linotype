@@ -10,3 +10,6 @@ dist
 # env
 .env
 .env.local
+
+# local work dir (created by linotype init when run from cli/)
+cli/docs

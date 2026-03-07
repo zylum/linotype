@@ -37,7 +37,7 @@ Usage:
   cli/linotype galley list
   cli/linotype galley auto
   cli/linotype slug new <galley-name> <slug-name>
-  cli/linotype exec brief <galley-name> [--copy]
+  cli/linotype exec brief <galley-name> [--copy] [--by-domain]
   cli/linotype bundle ai <galley-name>
   cli/linotype bundle project
   cli/linotype bundle review [--since 30d|7d|YYYY-WW|all] [--weekly]
